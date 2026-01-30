@@ -158,6 +158,13 @@
         messageInput.focus();
       };
 
+      const simulateAssistantResponse = (prompt) =>
+        new Promise((resolve) => {
+          window.setTimeout(() => {
+            resolve(`(Réponse locale) Vous avez écrit : ${prompt}`);
+          }, 600);
+        });
+
       const sendMessage = async () => {
         const text = messageInput.value.trim();
         if (!text) {
@@ -186,7 +193,7 @@
           // const data = await response.json();
           // const assistantReply = data.choices[0].message.content;
 
-          const assistantReply = "(Réponse de démonstration)";
+          const assistantReply = await simulateAssistantResponse(text);
 
           loadingMessage.remove();
           appendMessage(assistantReply, "ai");
