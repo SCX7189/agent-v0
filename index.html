@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Assistant IA – version principale</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #ffffff;
+        color: #1a1a1a;
+      }
+
+      header {
+        max-width: 720px;
+        margin: 0 auto 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .chat {
+        max-width: 720px;
+        margin: 0 auto 16px;
+        border: 1px solid #d0d0d0;
+        padding: 16px;
+        min-height: 280px;
+        background: #fafafa;
+      }
+
+      .message {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+      }
+
+      .message.user {
+        background: #f0f7ff;
+        border-color: #c9ddff;
+      }
+
+      .message.ai {
+        background: #ffffff;
+      }
+
+      .message.system {
+        background: #fff8e6;
+        border-color: #f4d58d;
+      }
+
+      .controls {
+        max-width: 720px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        padding: 10px 12px;
+        font-size: 16px;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+      }
+
+      button {
+        padding: 10px 16px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+
+      .primary {
+        background: #1a73e8;
+        color: #ffffff;
+      }
+
+      .secondary {
+        background: #ffffff;
+        color: #1a1a1a;
+        border-color: #d0d0d0;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      @media (max-width: 640px) {
+        .input-row {
+          flex-direction: column;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Assistant IA – version principale</h1>
+      <p>Posez votre question comme avant. Le service continue ici.</p>
+    </header>
+
+    <section class="chat" id="chat" aria-live="polite"></section>
+
+    <section class="controls">
+      <div class="input-row">
+        <input id="messageInput" type="text" placeholder="Écrivez votre message…" />
+        <button id="sendButton" class="primary" type="button">Envoyer</button>
+      </div>
+      <div class="actions">
+        <button id="newConversationButton" class="secondary" type="button">
+          Nouvelle conversation
+        </button>
+      </div>
+    </section>
+
+    <script>
+      const chat = document.getElementById("chat");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
+      const newConversationButton = document.getElementById("newConversationButton");
+
+      const appendMessage = (text, type) => {
+        const message = document.createElement("div");
+        message.className = `message ${type}`;
+        message.textContent = text;
+        chat.appendChild(message);
+        chat.scrollTop = chat.scrollHeight;
+      };
+
+      const clearConversation = () => {
+        chat.innerHTML = "";
+        messageInput.value = "";
+        messageInput.focus();
+      };
+
+      const sendMessage = async () => {
+        const text = messageInput.value.trim();
+        if (!text) {
+          return;
+        }
+
+        appendMessage(text, "user");
+        messageInput.value = "";
+        messageInput.focus();
+
+        const loadingMessage = document.createElement("div");
+        loadingMessage.className = "message system";
+        loadingMessage.textContent = "Réponse en cours…";
+        chat.appendChild(loadingMessage);
+
+        try {
+          // Placeholder for OpenAI API call:
+          // const response = await fetch("https://api.openai.com/v1/...", {
+          //   method: "POST",
+          //   headers: {
+          //     "Content-Type": "application/json",
+          //     "Authorization": `Bearer ${"VOTRE_CLE_API"}`,
+          //   },
+          //   body: JSON.stringify({ message: text }),
+          // });
+          // const data = await response.json();
+          // const assistantReply = data.choices[0].message.content;
+
+          const assistantReply = "(Réponse de démonstration)";
+
+          loadingMessage.remove();
+          appendMessage(assistantReply, "ai");
+        } catch (error) {
+          loadingMessage.remove();
+          appendMessage("Une erreur est survenue", "system");
+        }
+      };
+
+      sendButton.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+      newConversationButton.addEventListener("click", clearConversation);
+
+      clearConversation();
+    </script>
+  </body>
+</html>
