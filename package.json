@@ -1,0 +1,10 @@
+{
+  "name": "agent-backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Minimal OpenAI Agents SDK backend for Vercel.",
+  "dependencies": {
+    "openai": "^4.57.0"
+  }
+}
