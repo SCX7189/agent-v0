@@ -1,93 +1,125 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agent-v0</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 2rem; color: #111; }
-      .status { font-weight: 700; }
-      .ok { color: #0a7a0a; }
-      .err { color: #b00020; }
-      code { background: #f3f3f3; padding: 0.2rem 0.4rem; border-radius: 4px; }
-      input { padding: 0.5rem; width: 300px; margin-right: 10px; }
-      button { padding: 0.5rem; }
-      pre { margin-top: 1rem; background:#fafafa; padding:1rem; border-radius:6px;}
-    </style>
-  </head>
-  <body>
-    <h1>agent-v0</h1>
-    <p>This static frontend is deployed on Vercel.</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>agent-v0</title>
 
-    <p>
-      Backend API check:
-      <span id="apiStatus" class="status">checking…</span>
-    </p>
+  <style>
+    body { font-family: Arial; margin: 2rem; color:#111;}
+    .status { font-weight:700;}
+    .ok { color:#0a7a0a;}
+    .err { color:#b00020;}
+    input { padding:0.5rem; width:320px; margin-right:10px;}
+    button { padding:0.5rem;}
+    pre { margin-top:1rem; background:#fafafa; padding:1rem; border-radius:6px;}
+  </style>
+</head>
 
-    <hr />
+<body>
 
-    <h2>Test your agent</h2>
+<h1>agent-v0</h1>
+<p>Frontend deployed on Vercel.</p>
 
-    <input id="question" placeholder="Ask something..." />
-    <button onclick="askAgent()">Send</button>
+<p>
+Backend API check:
+<span id="apiStatus" class="status">checking…</span>
+</p>
 
-    <pre id="response"></pre>
+<hr/>
 
-    <script>
+<h2>Test your agent</h2>
 
-      const API_URL = "https://agent-backend-scx7189s-projects.vercel.app/api/agent";
+<input id="question" placeholder="Ask something..." />
+<button onclick="askAgent()">Send</button>
 
-      // ✅ CHECK API
-      (async () => {
-        const el = document.getElementById('apiStatus');
-        try {
+<pre id="response"></pre>
 
-          // On fait un POST volontaire → GET renverrait "Method Not Allowed"
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              messages: [{ role: "user", content: "ping" }]
-            })
-          });
+<script>
 
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+const API_URL = "https://agent-backend-scx7189s-projects.vercel.app/api/agent";
 
-          el.textContent = "connected ✅";
-          el.classList.add('ok');
-
-        } catch (err) {
-          el.textContent = `not reachable (${err.message})`;
-          el.classList.add('err');
-        }
-      })();
+const SECRET = "Laretraitesoon,99"; // ⚠️ remplace ici
 
 
-      // ✅ CALL AGENT
-      async function askAgent() {
+// 🔥 CHECK API
+(async () => {
 
-        const question = document.getElementById("question").value;
+  const el = document.getElementById("apiStatus");
 
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            messages: [
-              { role: "user", content: question }
-            ]
-          })
-        });
+  try {
 
-        const data = await res.json();
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-agent-secret": SECRET
+      },
+      body: JSON.stringify({
+        messages: [{ role:"user", content:"ping"}]
+      })
+    });
 
-        document.getElementById("response").textContent =
-          data.response || JSON.stringify(data, null, 2);
-      }
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
 
-    </script>
-  </body>
+    el.textContent = "connected ✅";
+    el.classList.add("ok");
+
+  } catch (err) {
+
+    el.textContent = `not reachable (${err.message})`;
+    el.classList.add("err");
+
+    console.error("API ERROR:", err);
+  }
+
+})();
+
+
+// 🔥 CALL AGENT
+async function askAgent() {
+
+  const responseBox = document.getElementById("response");
+  const question = document.getElementById("question").value.trim();
+
+  if (!question) {
+    responseBox.textContent = "⚠️ Please enter a question.";
+    return;
+  }
+
+  responseBox.textContent = "Thinking...";
+
+  try {
+
+    const res = await fetch(API_URL, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-agent-secret": SECRET
+      },
+      body: JSON.stringify({
+        messages:[
+          { role:"user", content:question }
+        ]
+      })
+    });
+
+    const data = await res.json();
+
+    responseBox.textContent =
+      data.response || JSON.stringify(data, null, 2);
+
+  } catch (err) {
+
+    responseBox.textContent = "❌ Error calling agent.";
+    console.error(err);
+
+  }
+}
+
+</script>
+
+</body>
 </html>
