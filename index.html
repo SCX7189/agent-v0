@@ -10,27 +10,84 @@
       .ok { color: #0a7a0a; }
       .err { color: #b00020; }
       code { background: #f3f3f3; padding: 0.2rem 0.4rem; border-radius: 4px; }
+      input { padding: 0.5rem; width: 300px; margin-right: 10px; }
+      button { padding: 0.5rem; }
+      pre { margin-top: 1rem; background:#fafafa; padding:1rem; border-radius:6px;}
     </style>
   </head>
   <body>
     <h1>agent-v0</h1>
     <p>This static frontend is deployed on Vercel.</p>
-    <p>Backend API check at <code>/api/health</code>: <span id="apiStatus" class="status">checking…</span></p>
+
+    <p>
+      Backend API check:
+      <span id="apiStatus" class="status">checking…</span>
+    </p>
+
+    <hr />
+
+    <h2>Test your agent</h2>
+
+    <input id="question" placeholder="Ask something..." />
+    <button onclick="askAgent()">Send</button>
+
+    <pre id="response"></pre>
 
     <script>
+
+      const API_URL = "https://agent-backend-scx7189s-projects.vercel.app/api/agent";
+
+      // ✅ CHECK API
       (async () => {
         const el = document.getElementById('apiStatus');
         try {
-          const res = await fetch('/api/health', { cache: 'no-store' });
+
+          // On fait un POST volontaire → GET renverrait "Method Not Allowed"
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: "ping" }]
+            })
+          });
+
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.text();
-          el.textContent = `connected (${data.slice(0, 80)})`;
+
+          el.textContent = "connected ✅";
           el.classList.add('ok');
+
         } catch (err) {
           el.textContent = `not reachable (${err.message})`;
           el.classList.add('err');
         }
       })();
+
+
+      // ✅ CALL AGENT
+      async function askAgent() {
+
+        const question = document.getElementById("question").value;
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: "user", content: question }
+            ]
+          })
+        });
+
+        const data = await res.json();
+
+        document.getElementById("response").textContent =
+          data.response || JSON.stringify(data, null, 2);
+      }
+
     </script>
   </body>
 </html>
