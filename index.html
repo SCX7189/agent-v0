@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>agent-v0</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; color: #111; }
+      .status { font-weight: 700; }
+      .ok { color: #0a7a0a; }
+      .err { color: #b00020; }
+      code { background: #f3f3f3; padding: 0.2rem 0.4rem; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>agent-v0</h1>
+    <p>This static frontend is deployed on Vercel.</p>
+    <p>Backend API check at <code>/api/health</code>: <span id="apiStatus" class="status">checking…</span></p>
+
+    <script>
+      (async () => {
+        const el = document.getElementById('apiStatus');
+        try {
+          const res = await fetch('/api/health', { cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.text();
+          el.textContent = `connected (${data.slice(0, 80)})`;
+          el.classList.add('ok');
+        } catch (err) {
+          el.textContent = `not reachable (${err.message})`;
+          el.classList.add('err');
+        }
+      })();
+    </script>
+  </body>
+</html>
