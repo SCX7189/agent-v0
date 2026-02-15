@@ -10,9 +10,10 @@
     .status { font-weight:700;}
     .ok { color:#0a7a0a;}
     .err { color:#b00020;}
-    input { padding:0.5rem; width:320px; margin-right:10px;}
+    input { padding:0.5rem; width:380px; margin-right:10px;}
     button { padding:0.5rem;}
     pre { margin-top:1rem; background:#fafafa; padding:1rem; border-radius:6px;}
+    .row { margin-bottom:0.75rem; }
   </style>
 </head>
 
@@ -28,6 +29,20 @@ Backend API check:
 
 <hr/>
 
+<h2>Backend config</h2>
+<div class="row">
+  <input id="apiUrl" placeholder="Backend API URL" />
+</div>
+<div class="row">
+  <input id="apiSecret" placeholder="x-agent-secret" />
+</div>
+<div class="row">
+  <button onclick="saveConfig()">Save config</button>
+  <button onclick="checkApi()">Re-check API</button>
+</div>
+
+<hr/>
+
 <h2>Test your agent</h2>
 
 <input id="question" placeholder="Ask something..." />
@@ -36,24 +51,56 @@ Backend API check:
 <pre id="response"></pre>
 
 <script>
+const DEFAULT_API_URL = "https://agent-backend-45l0yg6pn-scx7189s-projects.vercel.app/api/agent";
+const API_URL_KEY = "agent_v0_api_url";
+const API_SECRET_KEY = "agent_v0_api_secret";
 
-const API_URL = "https://agent-backend-45l0yg6pn-scx7189s-projects.vercel.app/api/agent";
+function getConfig() {
+  const apiUrlInput = document.getElementById("apiUrl");
+  const apiSecretInput = document.getElementById("apiSecret");
+  return {
+    apiUrl: apiUrlInput.value.trim(),
+    secret: apiSecretInput.value.trim()
+  };
+}
 
-const SECRET = "Laretraitesoon,99"; // ⚠️ remplace ici
+function loadConfig() {
+  const savedUrl = localStorage.getItem(API_URL_KEY);
+  const savedSecret = localStorage.getItem(API_SECRET_KEY);
+  document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
+  document.getElementById("apiSecret").value = savedSecret || "";
+}
 
+function saveConfig() {
+  const { apiUrl, secret } = getConfig();
+  localStorage.setItem(API_URL_KEY, apiUrl);
+  localStorage.setItem(API_SECRET_KEY, secret);
+  checkApi();
+}
 
-// 🔥 CHECK API
-(async () => {
-
+async function checkApi() {
   const el = document.getElementById("apiStatus");
+  const { apiUrl, secret } = getConfig();
+  el.classList.remove("ok", "err");
+
+  if (!apiUrl) {
+    el.textContent = "backend URL missing";
+    el.classList.add("err");
+    return;
+  }
+
+  if (!secret) {
+    el.textContent = "secret missing";
+    el.classList.add("err");
+    return;
+  }
 
   try {
-
-    const res = await fetch(API_URL, {
+    const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-agent-secret": SECRET
+        "x-agent-secret": secret
       },
       body: JSON.stringify({
         messages: [{ role:"user", content:"ping"}]
@@ -61,43 +108,44 @@ const SECRET = "Laretraitesoon,99"; // ⚠️ remplace ici
     });
 
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 180)}`);
     }
 
-    el.textContent = "connected ✅";
+    el.textContent = "connected";
     el.classList.add("ok");
 
   } catch (err) {
-
     el.textContent = `not reachable (${err.message})`;
     el.classList.add("err");
-
-    console.error("API ERROR:", err);
   }
+}
 
-})();
 
-
-// 🔥 CALL AGENT
 async function askAgent() {
 
   const responseBox = document.getElementById("response");
   const question = document.getElementById("question").value.trim();
+  const { apiUrl, secret } = getConfig();
 
   if (!question) {
-    responseBox.textContent = "⚠️ Please enter a question.";
+    responseBox.textContent = "Please enter a question.";
+    return;
+  }
+
+  if (!apiUrl || !secret) {
+    responseBox.textContent = "Configure backend URL and secret first.";
     return;
   }
 
   responseBox.textContent = "Thinking...";
 
   try {
-
-    const res = await fetch(API_URL, {
+    const res = await fetch(apiUrl, {
       method:"POST",
       headers:{
         "Content-Type":"application/json",
-        "x-agent-secret": SECRET
+        "x-agent-secret": secret
       },
       body: JSON.stringify({
         messages:[
@@ -106,19 +154,23 @@ async function askAgent() {
       })
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 180)}`);
+    }
+
     const data = await res.json();
 
     responseBox.textContent =
       data.response || JSON.stringify(data, null, 2);
 
   } catch (err) {
-
-    responseBox.textContent = "❌ Error calling agent.";
-    console.error(err);
-
+    responseBox.textContent = `Error calling agent: ${err.message}`;
   }
 }
 
+loadConfig();
+checkApi();
 </script>
 
 </body>
