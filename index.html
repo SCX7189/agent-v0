@@ -527,6 +527,9 @@
           if ("fallback" in data) {
             debugLines.push(`fallback: ${data.fallback ? String(data.fallback) : "none"}`);
           }
+          if ("promptVersion" in data) {
+            debugLines.push(`prompt_version: ${String(data.promptVersion)}`);
+          }
 
           if (data.airtableLog && typeof data.airtableLog === "object") {
             const a = data.airtableLog;
@@ -537,6 +540,18 @@
             }
             if (typeof a.details === "string" && a.details.trim().length > 0) {
               debugLines.push(`airtable_details: ${a.details.slice(0, 300)}`);
+            }
+            if (typeof a.fieldMapTried === "string" && a.fieldMapTried.trim().length > 0) {
+              debugLines.push(`airtable_field_map: ${a.fieldMapTried}`);
+            }
+          }
+
+          if (data.promptVersionLog && typeof data.promptVersionLog === "object") {
+            const p = data.promptVersionLog;
+            debugLines.push(`prompt_log_enabled: ${String(Boolean(p.enabled))}`);
+            debugLines.push(`prompt_log_ok: ${String(Boolean(p.ok))}`);
+            if (typeof p.details === "string" && p.details.trim().length > 0) {
+              debugLines.push(`prompt_log_details: ${p.details.slice(0, 300)}`);
             }
           }
         }
