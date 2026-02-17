@@ -298,6 +298,7 @@
     const API_SECRET_KEY = "agent_v0_api_secret";
     const DETAIL_MODE_KEY = "agent_v0_detail_mode";
     const CHAT_HISTORY_KEY = "agent_v0_chat_history";
+    const SESSION_ID_KEY = "agent_v0_session_id";
     const MAX_HISTORY_MESSAGES = 20;
 
     const STARTERS = [
@@ -309,6 +310,24 @@
     ];
 
     let history = [];
+    let sessionId = "";
+
+    function generateSessionId() {
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+      }
+      return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function loadSessionId() {
+      const existing = localStorage.getItem(SESSION_ID_KEY);
+      if (existing) {
+        sessionId = existing;
+        return;
+      }
+      sessionId = generateSessionId();
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
+    }
 
     function getConfig() {
       return {
@@ -358,6 +377,8 @@
 
     function clearConversation() {
       history = [];
+      sessionId = generateSessionId();
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
       saveHistory();
       renderThread();
     }
@@ -481,7 +502,9 @@
           },
           body: JSON.stringify({
             messages: history.filter((m) => m !== typingMessage),
-            detailMode
+            detailMode,
+            sessionId,
+            clientApiUrl: apiUrl
           })
         });
 
@@ -509,6 +532,7 @@
     });
 
     loadConfig();
+    loadSessionId();
     loadHistory();
     renderStarters();
     renderThread();
