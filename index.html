@@ -1,177 +1,502 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>agent-v0</title>
-
+  <title>IA Visibility Lab</title>
   <style>
-    body { font-family: Arial; margin: 2rem; color:#111;}
-    .status { font-weight:700;}
-    .ok { color:#0a7a0a;}
-    .err { color:#b00020;}
-    input { padding:0.5rem; width:380px; margin-right:10px;}
-    button { padding:0.5rem;}
-    pre { margin-top:1rem; background:#fafafa; padding:1rem; border-radius:6px;}
-    .row { margin-bottom:0.75rem; }
+    :root {
+      --bg: #f4f6fb;
+      --panel: #ffffff;
+      --line: #d9deea;
+      --ink: #111827;
+      --muted: #4b5563;
+      --brand: #0f4c81;
+      --brand-2: #1363a5;
+      --ok: #157347;
+      --err: #b42318;
+      --user: #e7f3ff;
+      --assistant: #f8fafc;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, #dbeafe 0%, transparent 35%),
+        radial-gradient(circle at 100% 100%, #e2e8f0 0%, transparent 40%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .left {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    h2 {
+      margin: 0 0 10px 0;
+      font-size: 15px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .status {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input, textarea, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font: inherit;
+    }
+
+    input {
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+      max-height: 220px;
+      padding: 12px;
+      line-height: 1.45;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      padding: 10px 12px;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+      transition: background 0.2s ease;
+    }
+
+    button:hover { background: var(--brand-2); }
+
+    button.secondary {
+      background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 78vh;
+      overflow: hidden;
+    }
+
+    .head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .starters {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .starter {
+      width: auto;
+      background: #eef4ff;
+      border-color: #c7daf8;
+      color: #103a61;
+      font-size: 13px;
+      padding: 8px 10px;
+    }
+
+    .thread {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .bubble {
+      max-width: 85%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      animation: appear 0.2s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: var(--user);
+      border-color: #c6ddfa;
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: var(--assistant);
+    }
+
+    .composer {
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      background: #fff;
+    }
+
+    .muted {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @keyframes appear {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 920px) {
+      .app { grid-template-columns: 1fr; }
+      .left { position: static; }
+      .main { min-height: 72vh; }
+    }
   </style>
 </head>
-
 <body>
+  <div class="app">
+    <aside class="left card">
+      <div>
+        <h1>IA Visibility Lab</h1>
+      </div>
 
-<h1>agent-v0</h1>
-<p>Frontend deployed on Vercel.</p>
+      <div>
+        <h2>Etat API</h2>
+        <div id="apiStatus" class="status">verification...</div>
+      </div>
 
-<p>
-Backend API check:
-<span id="apiStatus" class="status">checking…</span>
-</p>
+      <div>
+        <h2>Configuration backend</h2>
+        <label for="apiUrl">Backend URL</label>
+        <input id="apiUrl" placeholder="https://.../api/agent" />
+      </div>
 
-<hr/>
+      <div>
+        <label for="apiSecret">x-agent-secret</label>
+        <input id="apiSecret" placeholder="Ton secret agent" />
+      </div>
 
-<h2>Backend config</h2>
-<div class="row">
-  <input id="apiUrl" placeholder="Backend API URL" />
-</div>
-<div class="row">
-  <input id="apiSecret" placeholder="x-agent-secret" />
-</div>
-<div class="row">
-  <button onclick="saveConfig()">Save config</button>
-  <button onclick="checkApi()">Re-check API</button>
-</div>
+      <div class="btn-row">
+        <button onclick="saveConfig()">Save config</button>
+        <button class="secondary" onclick="checkApi()">Re-check API</button>
+      </div>
 
-<hr/>
+      <div class="btn-row">
+        <button class="secondary" onclick="clearConversation()">Reset conversation</button>
+      </div>
+    </aside>
 
-<h2>Test your agent</h2>
+    <main class="main card">
+      <div class="head">
+        <div>
+          <strong>Conversation strategique</strong>
+          <p>Le contexte est conserve entre les messages.</p>
+        </div>
+      </div>
 
-<input id="question" placeholder="Ask something..." />
-<button onclick="askAgent()">Send</button>
+      <div class="starters" id="starters"></div>
 
-<pre id="response"></pre>
+      <section id="thread" class="thread"></section>
 
-<script>
-const DEFAULT_API_URL = "https://agent-backend-six.vercel.app/api/agent";
-const API_URL_KEY = "agent_v0_api_url";
-const API_SECRET_KEY = "agent_v0_api_secret";
+      <div class="composer">
+        <textarea id="question" placeholder="Pose ta question (diagnostic, risques, decisions, plan d'action)..."></textarea>
+        <div class="btn-row">
+          <button onclick="askAgent()">Envoyer</button>
+          <button class="secondary" onclick="clearInput()">Effacer</button>
+        </div>
+        <p class="muted">Entree: nouvelle ligne. Ctrl+Entree (ou Cmd+Entree): envoyer.</p>
+      </div>
+    </main>
+  </div>
 
-function getConfig() {
-  const apiUrlInput = document.getElementById("apiUrl");
-  const apiSecretInput = document.getElementById("apiSecret");
-  return {
-    apiUrl: apiUrlInput.value.trim(),
-    secret: apiSecretInput.value.trim()
-  };
-}
+  <script>
+    const DEFAULT_API_URL = "https://agent-backend-six.vercel.app/api/agent";
+    const API_URL_KEY = "agent_v0_api_url";
+    const API_SECRET_KEY = "agent_v0_api_secret";
+    const CHAT_HISTORY_KEY = "agent_v0_chat_history";
+    const MAX_HISTORY_MESSAGES = 20;
 
-function loadConfig() {
-  const savedUrl = localStorage.getItem(API_URL_KEY);
-  const savedSecret = localStorage.getItem(API_SECRET_KEY);
-  document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
-  document.getElementById("apiSecret").value = savedSecret || "";
-}
+    const STARTERS = [
+      "Fais un diagnostic strategic de notre position IA sur 12 mois.",
+      "Quels sont nos 3 risques critiques et les signaux d'alerte associes ?",
+      "Propose 3 options de decision COMEX avec trade-offs explicites.",
+      "Construis un memo board-ready en 1 page sur notre priorite IA.",
+      "Fais un Red Team de notre plan actuel avec hypotheses concurrentes."
+    ];
 
-function saveConfig() {
-  const { apiUrl, secret } = getConfig();
-  localStorage.setItem(API_URL_KEY, apiUrl);
-  localStorage.setItem(API_SECRET_KEY, secret);
-  checkApi();
-}
+    let history = [];
 
-async function checkApi() {
-  const el = document.getElementById("apiStatus");
-  const { apiUrl, secret } = getConfig();
-  el.classList.remove("ok", "err");
-
-  if (!apiUrl) {
-    el.textContent = "backend URL missing";
-    el.classList.add("err");
-    return;
-  }
-
-  if (!secret) {
-    el.textContent = "secret missing";
-    el.classList.add("err");
-    return;
-  }
-
-  try {
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-agent-secret": secret
-      },
-      body: JSON.stringify({
-        messages: [{ role:"user", content:"ping"}]
-      })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 180)}`);
+    function getConfig() {
+      return {
+        apiUrl: document.getElementById("apiUrl").value.trim(),
+        secret: document.getElementById("apiSecret").value.trim()
+      };
     }
 
-    el.textContent = "connected";
-    el.classList.add("ok");
-
-  } catch (err) {
-    el.textContent = `not reachable (${err.message})`;
-    el.classList.add("err");
-  }
-}
-
-
-async function askAgent() {
-
-  const responseBox = document.getElementById("response");
-  const question = document.getElementById("question").value.trim();
-  const { apiUrl, secret } = getConfig();
-
-  if (!question) {
-    responseBox.textContent = "Please enter a question.";
-    return;
-  }
-
-  if (!apiUrl || !secret) {
-    responseBox.textContent = "Configure backend URL and secret first.";
-    return;
-  }
-
-  responseBox.textContent = "Thinking...";
-
-  try {
-    const res = await fetch(apiUrl, {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-agent-secret": secret
-      },
-      body: JSON.stringify({
-        messages:[
-          { role:"user", content:question }
-        ]
-      })
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 180)}`);
+    function loadConfig() {
+      const savedUrl = localStorage.getItem(API_URL_KEY);
+      const savedSecret = localStorage.getItem(API_SECRET_KEY);
+      document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
+      document.getElementById("apiSecret").value = savedSecret || "";
     }
 
-    const data = await res.json();
+    function saveConfig() {
+      const { apiUrl, secret } = getConfig();
+      localStorage.setItem(API_URL_KEY, apiUrl);
+      localStorage.setItem(API_SECRET_KEY, secret);
+      checkApi();
+    }
 
-    responseBox.textContent =
-      data.response || JSON.stringify(data, null, 2);
+    function loadHistory() {
+      const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+      if (!raw) {
+        history = [];
+        return;
+      }
 
-  } catch (err) {
-    responseBox.textContent = `Error calling agent: ${err.message}`;
-  }
-}
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          history = parsed.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
+        }
+      } catch {
+        history = [];
+      }
+    }
 
-loadConfig();
-checkApi();
-</script>
+    function saveHistory() {
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY_MESSAGES)));
+    }
 
+    function clearConversation() {
+      history = [];
+      saveHistory();
+      renderThread();
+    }
+
+    function clearInput() {
+      document.getElementById("question").value = "";
+    }
+
+    function appendMessage(role, content) {
+      history.push({ role, content });
+      history = history.slice(-MAX_HISTORY_MESSAGES);
+      saveHistory();
+      renderThread();
+    }
+
+    function renderThread() {
+      const thread = document.getElementById("thread");
+      thread.innerHTML = "";
+
+      if (history.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "Aucune conversation pour le moment. Utilise un starter ou pose une question.";
+        thread.appendChild(empty);
+        return;
+      }
+
+      for (const message of history) {
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${message.role}`;
+        bubble.textContent = message.content;
+        thread.appendChild(bubble);
+      }
+
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function renderStarters() {
+      const container = document.getElementById("starters");
+      container.innerHTML = "";
+
+      for (const text of STARTERS) {
+        const btn = document.createElement("button");
+        btn.className = "starter";
+        btn.textContent = text;
+        btn.onclick = () => {
+          document.getElementById("question").value = text;
+          askAgent();
+        };
+        container.appendChild(btn);
+      }
+    }
+
+    async function checkApi() {
+      const el = document.getElementById("apiStatus");
+      const { apiUrl, secret } = getConfig();
+      el.classList.remove("ok", "err");
+
+      if (!apiUrl) {
+        el.textContent = "backend URL manquante";
+        el.classList.add("err");
+        return;
+      }
+
+      if (!secret) {
+        el.textContent = "secret manquant";
+        el.classList.add("err");
+        return;
+      }
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-agent-secret": secret
+          },
+          body: JSON.stringify({ messages: [{ role: "user", content: "ping" }] })
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 160)}`);
+        }
+
+        el.textContent = "connecte";
+        el.classList.add("ok");
+      } catch (err) {
+        el.textContent = `non joignable (${err.message})`;
+        el.classList.add("err");
+      }
+    }
+
+    async function askAgent() {
+      const questionInput = document.getElementById("question");
+      const question = questionInput.value.trim();
+      const { apiUrl, secret } = getConfig();
+
+      if (!question) {
+        return;
+      }
+
+      if (!apiUrl || !secret) {
+        appendMessage("assistant", "Configure d'abord le backend URL et le secret.");
+        return;
+      }
+
+      appendMessage("user", question);
+      questionInput.value = "";
+
+      const typingMessage = { role: "assistant", content: "Analyse en cours..." };
+      history.push(typingMessage);
+      renderThread();
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-agent-secret": secret
+          },
+          body: JSON.stringify({ messages: history.filter((m) => m !== typingMessage) })
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 200)}`);
+        }
+
+        const data = await res.json();
+        const answer = typeof data.response === "string" ? data.response : JSON.stringify(data, null, 2);
+
+        history = history.filter((m) => m !== typingMessage);
+        appendMessage("assistant", answer);
+      } catch (err) {
+        history = history.filter((m) => m !== typingMessage);
+        appendMessage("assistant", `Erreur appel agent: ${err.message}`);
+      }
+    }
+
+    document.getElementById("question").addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        askAgent();
+      }
+    });
+
+    loadConfig();
+    loadHistory();
+    renderStarters();
+    renderThread();
+    checkApi();
+  </script>
 </body>
 </html>

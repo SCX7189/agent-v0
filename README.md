@@ -2,6 +2,13 @@
 
 Static frontend for calling the backend `/api/agent` endpoint.
 
+### Chat features
+
+- Persistent conversation history (localStorage)
+- Conversation starters
+- Backend URL + secret editable from the UI
+- Full message history is sent to keep context
+
 ### Local check
 
 Run a static server from this folder:
