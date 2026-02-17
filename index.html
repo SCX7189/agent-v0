@@ -6,39 +6,39 @@
   <title>IA Visibility Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-0: #f3efe6;
-      --bg-1: #f8f6f1;
-      --panel: #fffdf8;
-      --panel-soft: #f6f2ea;
-      --line: #d8cfbf;
-      --ink: #1f1a14;
-      --muted: #6b6258;
-      --brand: #0b5c5b;
-      --brand-2: #167474;
-      --ok: #13795b;
-      --err: #b22626;
-      --fact: #0a7cc7;
-      --hyp: #996d00;
-      --unk: #8a1d5f;
+      --bg-0: #0b0d10;
+      --bg-1: #12161b;
+      --panel: #161b22;
+      --panel-soft: #1b212b;
+      --line: rgba(255, 255, 255, 0.12);
+      --ink: #eceff3;
+      --muted: #a8b0bb;
+      --brand: #ff7a00;
+      --brand-2: #ff8d29;
+      --ok: #2ac28f;
+      --err: #ff5a5a;
+      --fact: #7ea7ff;
+      --hyp: #ffb75d;
+      --unk: #c08cff;
       --radius: 14px;
-      --shadow: 0 12px 26px rgba(31, 26, 20, 0.08);
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Space Grotesk", "Avenir Next", sans-serif;
+      font-family: "IBM Plex Sans", "Avenir Next", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(70vw 40vw at -10% 0%, #e7f4ec 0%, transparent 60%),
-        radial-gradient(60vw 35vw at 110% 100%, #f6e9d9 0%, transparent 58%),
+        radial-gradient(65vw 32vw at -10% -5%, rgba(126, 167, 255, 0.16) 0%, transparent 62%),
+        radial-gradient(55vw 36vw at 110% 100%, rgba(255, 122, 0, 0.14) 0%, transparent 60%),
         linear-gradient(180deg, var(--bg-0), var(--bg-1));
       min-height: 100vh;
-      padding: 18px;
+      padding: 16px;
     }
 
     .app {
@@ -51,7 +51,7 @@
     .topbar {
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: rgba(255, 253, 248, 0.88);
+      background: rgba(22, 27, 34, 0.85);
       backdrop-filter: blur(7px);
       box-shadow: var(--shadow);
       padding: 14px;
@@ -63,8 +63,9 @@
 
     .brand-title {
       margin: 0;
-      font-size: 24px;
+      font-size: 26px;
       letter-spacing: 0.01em;
+      color: #d2d8e0;
     }
 
     .brand-sub {
@@ -94,7 +95,7 @@
 
     .pill.active {
       background: var(--brand);
-      color: #fff;
+      color: #111;
       border-color: var(--brand);
     }
 
@@ -130,7 +131,8 @@
       font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: #9ea5af;
+      font-weight: 600;
     }
 
     label {
@@ -145,11 +147,17 @@
       font: inherit;
       border: 1px solid var(--line);
       border-radius: 10px;
-      background: #fff;
+      background: #10151c;
       color: var(--ink);
     }
 
     input, select { padding: 10px 11px; }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: rgba(126, 167, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(126, 167, 255, 0.14);
+    }
 
     textarea {
       resize: vertical;
@@ -163,17 +171,20 @@
       padding: 10px 11px;
       cursor: pointer;
       background: var(--brand);
-      color: #fff;
+      color: #111;
       border-color: var(--brand);
       font-weight: 600;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.16s ease;
     }
 
-    button:hover { background: var(--brand-2); }
+    button:hover {
+      background: var(--brand-2);
+      transform: translateY(-1px);
+    }
 
     .btn-secondary {
-      background: #fff;
-      color: var(--ink);
+      background: #121923;
+      color: #d7dce4;
       border-color: var(--line);
     }
 
@@ -196,7 +207,7 @@
     .trend-box {
       border: 1px solid var(--line);
       border-radius: 10px;
-      background: #fbfaf6;
+      background: #121923;
       padding: 8px;
       display: grid;
       gap: 8px;
@@ -226,14 +237,14 @@
     .trend-bar {
       height: 8px;
       border-radius: 999px;
-      background: #d9e7de;
+      background: #2a3544;
       overflow: hidden;
     }
 
     .trend-bar > span {
       display: block;
       height: 100%;
-      background: linear-gradient(90deg, #0b5c5b, #2d8f8e);
+      background: linear-gradient(90deg, #7ea7ff, #ff7a00);
     }
 
     .trend-meta { font-size: 11px; color: var(--muted); }
@@ -250,6 +261,7 @@
       padding: 14px;
       display: grid;
       gap: 6px;
+      background: linear-gradient(180deg, #1a2029, #151b23);
     }
 
     .chat-head strong { font-size: 17px; }
@@ -267,9 +279,9 @@
       border-radius: 999px;
       font-size: 12px;
       padding: 7px 10px;
-      background: #e7f4ec;
-      color: #0b5c5b;
-      border-color: #bad9ca;
+      background: #111923;
+      color: #d0d7e2;
+      border-color: #2a3544;
     }
 
     .thread {
@@ -278,7 +290,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background: linear-gradient(180deg, #fffefb, #f8f4eb);
+      background: linear-gradient(180deg, #10151c, #0f141b);
     }
 
     .bubble {
@@ -294,13 +306,13 @@
 
     .bubble.user {
       align-self: flex-end;
-      background: #e4efe9;
-      border-color: #c7dcd0;
+      background: #1e2834;
+      border-color: #2c3a4c;
     }
 
     .bubble.assistant {
       align-self: flex-start;
-      background: #fff;
+      background: #151c25;
     }
 
     .assistant-rich {
@@ -310,17 +322,19 @@
 
     .assistant-h1 {
       margin: 2px 0 4px;
-      font-size: 20px;
+      font-size: 19px;
       line-height: 1.2;
       font-weight: 700;
+      color: #d9dee7;
     }
 
     .assistant-h2 {
       margin: 6px 0 2px;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.25;
-      color: #2e2720;
+      color: #b9c0cb;
       font-weight: 700;
+      letter-spacing: 0.01em;
     }
 
     .assistant-p {
@@ -339,16 +353,16 @@
       letter-spacing: 0.02em;
     }
 
-    .line-tag.fact { background: #e3f2ff; color: #00589b; }
-    .line-tag.hyp { background: #fff1cf; color: #7a5700; }
-    .line-tag.unk { background: #fce4f3; color: #7a1e55; }
+    .line-tag.fact { background: rgba(126, 167, 255, 0.2); color: #b8d2ff; }
+    .line-tag.hyp { background: rgba(255, 183, 93, 0.2); color: #ffd29b; }
+    .line-tag.unk { background: rgba(192, 140, 255, 0.2); color: #debeff; }
 
     .composer {
       border-top: 1px solid var(--line);
       padding: 12px;
       display: grid;
       gap: 8px;
-      background: #fffcf6;
+      background: #131922;
     }
 
     .right-col {
@@ -385,7 +399,7 @@
       border-radius: 9px;
       padding: 8px 7px;
       text-align: center;
-      background: #fff;
+      background: #111923;
     }
 
     .stat-chip b {
@@ -414,7 +428,7 @@
       text-align: left;
       border: 1px solid var(--line);
       border-radius: 10px;
-      background: #fff;
+      background: #111923;
       color: var(--ink);
       padding: 8px 9px;
       font-size: 12px;
@@ -425,14 +439,14 @@
     .step-item.active {
       border-color: var(--brand);
       box-shadow: inset 0 0 0 1px var(--brand);
-      background: #edf7f3;
+      background: rgba(255, 122, 0, 0.13);
     }
 
     .item {
       border: 1px solid var(--line);
       border-radius: 10px;
       padding: 9px;
-      background: #fff;
+      background: #111923;
       font-size: 13px;
       line-height: 1.35;
     }
@@ -445,6 +459,7 @@
       margin: 0;
       color: var(--muted);
       font-size: 13px;
+      line-height: 1.45;
     }
 
     .tech-trace {
@@ -457,7 +472,7 @@
       border: 1px dashed var(--line);
       border-radius: 10px;
       padding: 8px;
-      background: #faf7ef;
+      background: #111923;
     }
 
     .tech-row {
@@ -469,8 +484,8 @@
     }
 
     .tech-row:last-child { border-bottom: 0; }
-    .tech-key { color: #5f5549; font-weight: 600; }
-    .tech-value { color: #1f1a14; text-align: right; }
+    .tech-key { color: #8d98a8; font-weight: 600; }
+    .tech-value { color: #dee4ee; text-align: right; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
@@ -734,8 +749,21 @@
         .trim();
     }
 
+    function normalizeDisplayLine(input) {
+      let line = cleanMarkdownInline(input || "");
+      line = line
+        .replace(/^#{1,6}\s+/u, "")
+        .replace(/^[0-9]\uFE0F?\u20E3\s*/u, "")
+        .replace(/^\d+[.)]\s+/u, "")
+        .replace(/^[-*+]\s+/u, "")
+        .replace(/^\s*[-•]\s+/u, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+      return line;
+    }
+
     function splitStatusTag(line) {
-      const raw = cleanMarkdownInline(line);
+      const raw = normalizeDisplayLine(line);
       if (raw.includes("[Fact")) return { clean: cleanMarkdownInline(raw.replace(/\[Fact[^\]]*\]/gi, "")), tagClass: "fact", tagLabel: "Fact" };
       if (raw.includes("[Hypothesis")) return { clean: cleanMarkdownInline(raw.replace(/\[Hypothesis[^\]]*\]/gi, "")), tagClass: "hyp", tagLabel: "Hypothesis" };
       if (raw.includes("[Unknown")) return { clean: cleanMarkdownInline(raw.replace(/\[Unknown[^\]]*\]/gi, "")), tagClass: "unk", tagLabel: "Unknown" };
@@ -746,17 +774,19 @@
     }
 
     function formatAssistantLine(rawLine) {
+      const raw = String(rawLine || "").trim();
       const parsed = splitStatusTag(rawLine);
       let line = parsed.clean || rawLine.trim();
       let klass = "assistant-p";
 
-      if (/^#\s+/.test(line)) {
-        klass = "assistant-h1";
-        line = line.replace(/^#\s+/, "");
-      } else if (/^##\s+/.test(line)) {
+      if (/^##\s+/.test(raw) || /^\d+[.)]\s+/.test(raw) || /^[0-9]\uFE0F?\u20E3/.test(raw)) {
         klass = "assistant-h2";
-        line = line.replace(/^##\s+/, "");
+      } else if (/^#\s+/.test(raw)) {
+        klass = "assistant-h1";
       }
+
+      line = normalizeDisplayLine(line);
+      if (!line) return "";
 
       const tagHtml = parsed.tagClass ? `<span class="line-tag ${parsed.tagClass}">${parsed.tagLabel}</span>` : "";
       if (klass === "assistant-h1") return `<h1 class="${klass}">${escapeHtml(line)}${tagHtml}</h1>`;
@@ -767,7 +797,8 @@
     function formatAssistantContent(content) {
       const lines = String(content || "").split(/\n+/).map((l) => l.trim()).filter(Boolean);
       if (lines.length === 0) return "<p class=\"assistant-p\"></p>";
-      return `<div class=\"assistant-rich\">${lines.map((line) => formatAssistantLine(line)).join("")}</div>`;
+      const rendered = lines.map((line) => formatAssistantLine(line)).filter(Boolean).join("");
+      return `<div class=\"assistant-rich\">${rendered || "<p class='assistant-p'></p>"}</div>`;
     }
 
     function formatInsightText(line) {
@@ -777,16 +808,21 @@
     }
 
     function buildSectionListFromText(text) {
-      const lines = String(text || "").split("\n").map((l) => cleanMarkdownInline(l)).filter(Boolean);
+      const lines = String(text || "").split("\n").map((l) => String(l || "").trim()).filter(Boolean);
       const sections = [];
-      for (const line of lines) {
-        const m = line.match(/^##\s*(.+)$/);
-        if (!m) continue;
-        const label = m[1].trim();
-        if (!label) continue;
-        sections.push(label);
+      for (const rawLine of lines) {
+        const heading = rawLine.match(/^#{1,3}\s+(.+)$/);
+        if (heading && heading[1]) {
+          sections.push(normalizeDisplayLine(heading[1]));
+          continue;
+        }
+
+        const numbered = rawLine.match(/^(\d+[.)]|[0-9]\uFE0F?\u20E3)\s*(.+)$/u);
+        if (numbered && numbered[2]) {
+          sections.push(normalizeDisplayLine(numbered[2]));
+        }
       }
-      return sections.slice(0, 14);
+      return [...new Set(sections.filter(Boolean))].slice(0, 14);
     }
 
     function renderStepperFromLatestBubble() {
@@ -1028,7 +1064,7 @@
     }
 
     function extractInsights(text) {
-      const lines = String(text || "").split("\n").map((l) => cleanMarkdownInline(l)).filter(Boolean);
+      const lines = String(text || "").split("\n").map((l) => normalizeDisplayLine(l)).filter(Boolean);
       const facts = [];
       const hypotheses = [];
       const unknowns = [];
