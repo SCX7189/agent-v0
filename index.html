@@ -303,6 +303,44 @@
       background: #fff;
     }
 
+    .assistant-rich {
+      display: grid;
+      gap: 7px;
+    }
+
+    .assistant-h1 {
+      margin: 2px 0 4px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .assistant-h2 {
+      margin: 6px 0 2px;
+      font-size: 16px;
+      line-height: 1.25;
+      color: #2e2720;
+    }
+
+    .assistant-p {
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .line-tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      vertical-align: middle;
+      letter-spacing: 0.02em;
+    }
+
+    .line-tag.fact { background: #e3f2ff; color: #00589b; }
+    .line-tag.hyp { background: #fff1cf; color: #7a5700; }
+    .line-tag.unk { background: #fce4f3; color: #7a1e55; }
+
     .composer {
       border-top: 1px solid var(--line);
       padding: 12px;
@@ -357,7 +395,7 @@
       font-size: 12px;
       color: var(--muted);
       line-height: 1.35;
-      white-space: pre-wrap;
+      white-space: normal;
       max-height: 220px;
       overflow-y: auto;
       border: 1px dashed var(--line);
@@ -365,6 +403,18 @@
       padding: 8px;
       background: #faf7ef;
     }
+
+    .tech-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px dashed #ddd3c3;
+      padding: 4px 0;
+    }
+
+    .tech-row:last-child { border-bottom: 0; }
+    .tech-key { color: #5f5549; font-weight: 600; }
+    .tech-value { color: #1f1a14; text-align: right; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
@@ -612,6 +662,46 @@
       renderThread();
     }
 
+    function escapeHtml(text) {
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function splitStatusTag(line) {
+      if (line.includes("[Fact")) return { clean: line.replace(/\[Fact[^\]]*\]/gi, "").trim(), tagClass: "fact", tagLabel: "Fact" };
+      if (line.includes("[Hypothesis")) return { clean: line.replace(/\[Hypothesis[^\]]*\]/gi, "").trim(), tagClass: "hyp", tagLabel: "Hypothesis" };
+      if (line.includes("[Unknown")) return { clean: line.replace(/\[Unknown[^\]]*\]/gi, "").trim(), tagClass: "unk", tagLabel: "Unknown" };
+      return { clean: line.trim(), tagClass: "", tagLabel: "" };
+    }
+
+    function formatAssistantLine(rawLine) {
+      const parsed = splitStatusTag(rawLine);
+      let line = parsed.clean || rawLine.trim();
+      let klass = "assistant-p";
+
+      if (/^#\s+/.test(line)) {
+        klass = "assistant-h1";
+        line = line.replace(/^#\s+/, "");
+      } else if (/^##\s+/.test(line)) {
+        klass = "assistant-h2";
+        line = line.replace(/^##\s+/, "");
+      }
+
+      const tagHtml = parsed.tagClass ? `<span class="line-tag ${parsed.tagClass}">${parsed.tagLabel}</span>` : "";
+      return `<p class="${klass}">${escapeHtml(line)}${tagHtml}</p>`;
+    }
+
+    function formatAssistantContent(content) {
+      const lines = String(content || "").split(/\n+/).map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) return "<p class=\"assistant-p\"></p>";
+      return `<div class=\"assistant-rich\">${lines.map((line) => formatAssistantLine(line)).join("")}</div>`;
+    }
+
+    function formatInsightText(line) {
+      const parsed = splitStatusTag(line);
+      if (!parsed.tagLabel) return parsed.clean;
+      return `${parsed.clean} (${parsed.tagLabel})`;
+    }
+
     function renderThread() {
       const thread = document.getElementById("thread");
       thread.innerHTML = "";
@@ -625,7 +715,11 @@
       for (const message of history) {
         const bubble = document.createElement("div");
         bubble.className = `bubble ${message.role}`;
-        bubble.textContent = message.content;
+        if (message.role === "assistant") {
+          bubble.innerHTML = formatAssistantContent(message.content);
+        } else {
+          bubble.textContent = message.content;
+        }
         thread.appendChild(bubble);
       }
       thread.scrollTop = thread.scrollHeight;
@@ -712,7 +806,7 @@
         const fallbackInfo = data.fallbackReason ? ` | fallback: ${data.fallbackReason}` : "";
         status.textContent = `source: ${data.provider || "unknown"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}${fallbackInfo}`;
       } catch (err) {
-        status.textContent = `erreur tendances: ${err.message}`;
+        status.textContent = "signaux indisponibles pour le moment (source externe limitee).";
       }
     }
 
@@ -816,21 +910,24 @@
         sub.textContent = "Faits, hypotheses et inconnus de la derniere reponse.";
 
         for (const line of data.facts) {
+          const parsed = splitStatusTag(line);
           const item = document.createElement("div");
-          item.className = "item fact";
-          item.textContent = line;
+          item.className = `item ${parsed.tagClass || "fact"}`;
+          item.textContent = formatInsightText(line);
           container.appendChild(item);
         }
         for (const line of data.hypotheses.slice(0, 3)) {
+          const parsed = splitStatusTag(line);
           const item = document.createElement("div");
-          item.className = "item hyp";
-          item.textContent = line;
+          item.className = `item ${parsed.tagClass || "hyp"}`;
+          item.textContent = formatInsightText(line);
           container.appendChild(item);
         }
         for (const line of data.unknowns.slice(0, 3)) {
+          const parsed = splitStatusTag(line);
           const item = document.createElement("div");
-          item.className = "item unk";
-          item.textContent = line;
+          item.className = `item ${parsed.tagClass || "unk"}`;
+          item.textContent = formatInsightText(line);
           container.appendChild(item);
         }
       }
@@ -841,9 +938,10 @@
 
         const source = [...data.hypotheses, ...data.unknowns, ...data.sections].slice(0, 8);
         for (const line of source) {
+          const parsed = splitStatusTag(line);
           const item = document.createElement("div");
-          item.className = line.includes("[Unknown") ? "item unk" : "item hyp";
-          item.textContent = line;
+          item.className = `item ${parsed.tagClass || "hyp"}`;
+          item.textContent = formatInsightText(line);
           container.appendChild(item);
         }
       }
@@ -862,7 +960,7 @@
           for (const line of source) {
             const item = document.createElement("div");
             item.className = "item";
-            item.textContent = line;
+            item.textContent = formatInsightText(line);
             container.appendChild(item);
           }
         }
@@ -871,7 +969,16 @@
 
     function setTechnicalTrace(lines) {
       const target = document.getElementById("techTrace");
-      target.textContent = lines.length > 0 ? lines.join("\n") : "Aucune execution pour le moment.";
+      if (!lines || lines.length === 0) {
+        target.textContent = "Aucune execution pour le moment.";
+        return;
+      }
+
+      target.innerHTML = lines.map((line) => {
+        const [key, ...rest] = line.split(":");
+        const value = rest.join(":").trim() || "-";
+        return `<div class="tech-row"><span class="tech-key">${escapeHtml(key.trim())}</span><span class="tech-value">${escapeHtml(value)}</span></div>`;
+      }).join("");
     }
 
     async function askAgent() {
