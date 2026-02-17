@@ -216,6 +216,54 @@
       color: var(--muted);
     }
 
+    .trend-box {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #f9fbff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .trend-status {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .trend-row {
+      display: grid;
+      grid-template-columns: 96px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .trend-key {
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trend-bar {
+      height: 8px;
+      background: #dbe7f7;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .trend-bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #0f4c81, #2c7bc0);
+    }
+
+    .trend-meta {
+      min-width: 44px;
+      text-align: right;
+      color: var(--muted);
+    }
+
     @keyframes appear {
       from { transform: translateY(6px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -267,6 +315,19 @@
       <div class="btn-row">
         <button class="secondary" onclick="clearConversation()">Reset conversation</button>
       </div>
+
+      <div>
+        <h2>Market signals (gratuit)</h2>
+        <label for="trendKeywords">Mots-cles (virgules)</label>
+        <input id="trendKeywords" placeholder="manomano, leroy merlin, castorama" />
+        <div class="btn-row" style="margin-top:8px;">
+          <button onclick="refreshTrends()">Charger tendances</button>
+        </div>
+        <div class="trend-box" style="margin-top:8px;">
+          <div id="trendStatus" class="trend-status">en attente...</div>
+          <div id="trendResults"></div>
+        </div>
+      </div>
     </aside>
 
     <main class="main card">
@@ -297,6 +358,7 @@
     const API_URL_KEY = "agent_v0_api_url";
     const API_SECRET_KEY = "agent_v0_api_secret";
     const DETAIL_MODE_KEY = "agent_v0_detail_mode";
+    const TREND_KEYWORDS_KEY = "agent_v0_trend_keywords";
     const CHAT_HISTORY_KEY = "agent_v0_chat_history";
     const SESSION_ID_KEY = "agent_v0_session_id";
     const MAX_HISTORY_MESSAGES = 20;
@@ -333,7 +395,8 @@
       return {
         apiUrl: document.getElementById("apiUrl").value.trim(),
         secret: document.getElementById("apiSecret").value.trim(),
-        detailMode: document.getElementById("detailMode").value
+        detailMode: document.getElementById("detailMode").value,
+        trendKeywords: document.getElementById("trendKeywords").value.trim()
       };
     }
 
@@ -341,17 +404,114 @@
       const savedUrl = localStorage.getItem(API_URL_KEY);
       const savedSecret = localStorage.getItem(API_SECRET_KEY);
       const savedDetailMode = localStorage.getItem(DETAIL_MODE_KEY);
+      const savedTrendKeywords = localStorage.getItem(TREND_KEYWORDS_KEY);
       document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
       document.getElementById("apiSecret").value = savedSecret || "";
       document.getElementById("detailMode").value = savedDetailMode || "long";
+      document.getElementById("trendKeywords").value = savedTrendKeywords || "manomano, leroy merlin, castorama";
     }
 
     function saveConfig() {
-      const { apiUrl, secret, detailMode } = getConfig();
+      const { apiUrl, secret, detailMode, trendKeywords } = getConfig();
       localStorage.setItem(API_URL_KEY, apiUrl);
       localStorage.setItem(API_SECRET_KEY, secret);
       localStorage.setItem(DETAIL_MODE_KEY, detailMode);
+      localStorage.setItem(TREND_KEYWORDS_KEY, trendKeywords);
       checkApi();
+    }
+
+    function getTrendsApiUrl(apiUrl) {
+      if (!apiUrl) return "";
+      if (/\/api\/agent\/?$/.test(apiUrl)) {
+        return apiUrl.replace(/\/api\/agent\/?$/, "/api/market-signals");
+      }
+      if (/\/api\/?$/.test(apiUrl)) {
+        return `${apiUrl.replace(/\/$/, "")}/market-signals`;
+      }
+      return `${apiUrl.replace(/\/$/, "")}/api/market-signals`;
+    }
+
+    function renderTrends(data) {
+      const target = document.getElementById("trendResults");
+      target.innerHTML = "";
+
+      const series = Array.isArray(data?.series) ? data.series : [];
+      if (series.length === 0) {
+        target.textContent = "Aucune donnee.";
+        return;
+      }
+
+      for (const item of series) {
+        const row = document.createElement("div");
+        row.className = "trend-row";
+
+        const key = document.createElement("div");
+        key.className = "trend-key";
+        key.textContent = item.keyword || "-";
+
+        const bar = document.createElement("div");
+        bar.className = "trend-bar";
+        const fill = document.createElement("span");
+        const width = Math.max(2, Math.min(100, Number(item.latest || 0)));
+        fill.style.width = `${width}%`;
+        bar.appendChild(fill);
+
+        const meta = document.createElement("div");
+        meta.className = "trend-meta";
+        const delta = Number(item.delta || 0);
+        const trendArrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
+        meta.textContent = `${trendArrow} ${Number(item.latest || 0)}`;
+
+        row.appendChild(key);
+        row.appendChild(bar);
+        row.appendChild(meta);
+        target.appendChild(row);
+      }
+    }
+
+    async function refreshTrends() {
+      const status = document.getElementById("trendStatus");
+      const { apiUrl, secret, trendKeywords } = getConfig();
+      const trendsApiUrl = getTrendsApiUrl(apiUrl);
+
+      if (!trendsApiUrl || !secret) {
+        status.textContent = "configure le backend URL et le secret.";
+        return;
+      }
+
+      status.textContent = "chargement...";
+      localStorage.setItem(TREND_KEYWORDS_KEY, trendKeywords);
+      const keywords = trendKeywords
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
+      try {
+        const res = await fetch(trendsApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-agent-secret": secret
+          },
+          body: JSON.stringify({
+            keywords,
+            geo: "FR",
+            timeframe: "today 3-m"
+          })
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 140)}`);
+        }
+
+        const data = await res.json();
+        renderTrends(data);
+        status.textContent = `source: ${data.provider || "google-trends-free"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}`;
+      } catch (err) {
+        status.textContent = `erreur tendances: ${err.message}`;
+      }
     }
 
     function loadHistory() {
@@ -582,6 +742,7 @@
     renderStarters();
     renderThread();
     checkApi();
+    refreshTrends();
   </script>
 </body>
 </html>

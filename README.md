@@ -8,6 +8,7 @@ Static frontend for calling the backend `/api/agent` endpoint.
 - Conversation starters
 - Backend URL + secret editable from the UI
 - Full message history is sent to keep context
+- Market signals panel (Google Trends gratuit) with keyword comparison
 
 ### Local check
 
