@@ -2,112 +2,179 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IA Visibility Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f4f6fb;
-      --panel: #ffffff;
-      --line: #d9deea;
-      --ink: #111827;
-      --muted: #4b5563;
-      --brand: #0f4c81;
-      --brand-2: #1363a5;
-      --ok: #157347;
-      --err: #b42318;
-      --user: #e7f3ff;
-      --assistant: #f8fafc;
+      --bg-0: #f3efe6;
+      --bg-1: #f8f6f1;
+      --panel: #fffdf8;
+      --panel-soft: #f6f2ea;
+      --line: #d8cfbf;
+      --ink: #1f1a14;
+      --muted: #6b6258;
+      --brand: #0b5c5b;
+      --brand-2: #167474;
+      --ok: #13795b;
+      --err: #b22626;
+      --fact: #0a7cc7;
+      --hyp: #996d00;
+      --unk: #8a1d5f;
+      --radius: 14px;
+      --shadow: 0 12px 26px rgba(31, 26, 20, 0.08);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-family: "Space Grotesk", "Avenir Next", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at 0% 0%, #dbeafe 0%, transparent 35%),
-        radial-gradient(circle at 100% 100%, #e2e8f0 0%, transparent 40%),
-        var(--bg);
+        radial-gradient(70vw 40vw at -10% 0%, #e7f4ec 0%, transparent 60%),
+        radial-gradient(60vw 35vw at 110% 100%, #f6e9d9 0%, transparent 58%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
       min-height: 100vh;
-      padding: 20px;
+      padding: 18px;
     }
 
     .app {
-      max-width: 1200px;
+      max-width: 1420px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 330px 1fr;
-      gap: 16px;
+      gap: 14px;
+    }
+
+    .topbar {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, 0.88);
+      backdrop-filter: blur(7px);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .view-switch {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      color: var(--ink);
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .pill.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 330px minmax(420px, 1fr) 360px;
+      gap: 14px;
+      align-items: start;
     }
 
     .card {
-      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
 
-    .left {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      height: fit-content;
+    .left-col {
+      display: grid;
+      gap: 12px;
       position: sticky;
-      top: 20px;
+      top: 16px;
     }
 
-    h1 {
+    .section {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .section h2 {
       margin: 0;
-      font-size: 22px;
-      letter-spacing: 0.2px;
-    }
-
-    h2 {
-      margin: 0 0 10px 0;
-      font-size: 15px;
-      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .status {
-      font-weight: 700;
       color: var(--muted);
     }
-
-    .status.ok { color: var(--ok); }
-    .status.err { color: var(--err); }
 
     label {
       display: block;
-      font-size: 13px;
-      margin-bottom: 6px;
+      font-size: 12px;
       color: var(--muted);
+      margin-bottom: 5px;
     }
 
-    input, textarea, button, select {
+    input, textarea, select, button {
       width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--line);
       font: inherit;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
     }
 
-    input, select {
-      padding: 10px 12px;
-      color: var(--ink);
-      background: #fff;
-    }
+    input, select { padding: 10px 11px; }
 
     textarea {
       resize: vertical;
-      min-height: 90px;
-      max-height: 220px;
+      min-height: 96px;
+      max-height: 260px;
       padding: 12px;
-      line-height: 1.45;
-      color: var(--ink);
+      line-height: 1.42;
+    }
+
+    button {
+      padding: 10px 11px;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    button:hover { background: var(--brand-2); }
+
+    .btn-secondary {
       background: #fff;
+      color: var(--ink);
+      border-color: var(--line);
     }
 
     .btn-row {
@@ -116,101 +183,11 @@
       gap: 8px;
     }
 
-    button {
-      padding: 10px 12px;
-      cursor: pointer;
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-      transition: background 0.2s ease;
-    }
+    .status { font-weight: 700; color: var(--muted); }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
 
-    button:hover { background: var(--brand-2); }
-
-    button.secondary {
-      background: #fff;
-      color: var(--ink);
-      border-color: var(--line);
-    }
-
-    .main {
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      min-height: 78vh;
-      overflow: hidden;
-    }
-
-    .head {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .head p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .starters {
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .starter {
-      width: auto;
-      background: #eef4ff;
-      border-color: #c7daf8;
-      color: #103a61;
-      font-size: 13px;
-      padding: 8px 10px;
-    }
-
-    .thread {
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-    }
-
-    .bubble {
-      max-width: 85%;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      white-space: pre-wrap;
-      line-height: 1.45;
-      animation: appear 0.2s ease;
-    }
-
-    .bubble.user {
-      align-self: flex-end;
-      background: var(--user);
-      border-color: #c6ddfa;
-    }
-
-    .bubble.assistant {
-      align-self: flex-start;
-      background: var(--assistant);
-    }
-
-    .composer {
-      border-top: 1px solid var(--line);
-      padding: 12px;
-      display: grid;
-      gap: 8px;
-      background: #fff;
-    }
-
-    .muted {
+    .mini-note {
       margin: 0;
       font-size: 12px;
       color: var(--muted);
@@ -219,139 +196,294 @@
     .trend-box {
       border: 1px solid var(--line);
       border-radius: 10px;
-      padding: 10px;
-      background: #f9fbff;
+      background: #fbfaf6;
+      padding: 8px;
       display: grid;
       gap: 8px;
+      min-height: 88px;
     }
 
     .trend-status {
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.35;
     }
 
     .trend-row {
       display: grid;
-      grid-template-columns: 96px 1fr auto;
+      grid-template-columns: 90px 1fr auto;
+      gap: 7px;
       align-items: center;
-      gap: 8px;
       font-size: 12px;
     }
 
     .trend-key {
-      color: var(--ink);
-      white-space: nowrap;
       overflow: hidden;
+      white-space: nowrap;
       text-overflow: ellipsis;
     }
 
     .trend-bar {
       height: 8px;
-      background: #dbe7f7;
       border-radius: 999px;
+      background: #d9e7de;
       overflow: hidden;
     }
 
     .trend-bar > span {
       display: block;
       height: 100%;
-      background: linear-gradient(90deg, #0f4c81, #2c7bc0);
+      background: linear-gradient(90deg, #0b5c5b, #2d8f8e);
     }
 
-    .trend-meta {
-      min-width: 44px;
-      text-align: right;
+    .trend-meta { font-size: 11px; color: var(--muted); }
+
+    .chat-shell {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 78vh;
+      overflow: hidden;
+    }
+
+    .chat-head {
+      border-bottom: 1px solid var(--line);
+      padding: 14px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .chat-head strong { font-size: 17px; }
+
+    .starters {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .starter {
+      width: auto;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 7px 10px;
+      background: #e7f4ec;
+      color: #0b5c5b;
+      border-color: #bad9ca;
+    }
+
+    .thread {
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: linear-gradient(180deg, #fffefb, #f8f4eb);
+    }
+
+    .bubble {
+      max-width: 90%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      font-size: 14px;
+      animation: fadeIn .2s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: #e4efe9;
+      border-color: #c7dcd0;
+    }
+
+    .bubble.assistant {
+      align-self: flex-start;
+      background: #fff;
+    }
+
+    .composer {
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      background: #fffcf6;
+    }
+
+    .right-col {
+      display: grid;
+      gap: 12px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .mode-title {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .mode-sub {
+      margin: 4px 0 0;
       color: var(--muted);
+      font-size: 12px;
     }
 
-    @keyframes appear {
-      from { transform: translateY(6px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .list {
+      display: grid;
+      gap: 8px;
     }
 
-    @media (max-width: 920px) {
-      .app { grid-template-columns: 1fr; }
-      .left { position: static; }
-      .main { min-height: 72vh; }
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .item.fact { border-left: 4px solid var(--fact); }
+    .item.hyp { border-left: 4px solid var(--hyp); }
+    .item.unk { border-left: 4px solid var(--unk); }
+
+    .muted-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tech-trace {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+      white-space: pre-wrap;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      background: #faf7ef;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 300px 1fr; }
+      .right-col { grid-column: span 2; position: static; grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 12px; }
+      .workspace { grid-template-columns: 1fr; }
+      .left-col, .right-col { position: static; }
+      .right-col { grid-template-columns: 1fr; }
+      .chat-shell { min-height: 64vh; }
+      .topbar { grid-template-columns: 1fr; }
+      .view-switch { justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="left card">
+    <header class="topbar">
       <div>
-        <h1>IA Visibility Lab</h1>
+        <h1 class="brand-title">IA Visibility Lab</h1>
+        <p class="brand-sub">Audit decisionnel assiste IA: preuves, scenarios, decisions.</p>
       </div>
-
-      <div>
-        <h2>Etat API</h2>
-        <div id="apiStatus" class="status">verification...</div>
+      <div class="view-switch" id="viewSwitch">
+        <button class="pill active" data-view="diagnostic">Diagnostic</button>
+        <button class="pill" data-view="scenarios">Scenarios</button>
+        <button class="pill" data-view="decision">Decision</button>
       </div>
+    </header>
 
-      <div>
-        <h2>Configuration backend</h2>
-        <label for="apiUrl">Backend URL</label>
-        <input id="apiUrl" placeholder="https://.../api/agent" />
-      </div>
+    <div class="workspace">
+      <aside class="left-col">
+        <section class="card section">
+          <h2>Etat API</h2>
+          <div id="apiStatus" class="status">verification...</div>
+        </section>
 
-      <div>
-        <label for="apiSecret">x-agent-secret</label>
-        <input id="apiSecret" placeholder="Ton secret agent" />
-      </div>
+        <section class="card section">
+          <h2>Configuration</h2>
+          <div>
+            <label for="apiUrl">Backend URL</label>
+            <input id="apiUrl" placeholder="https://.../api/agent" />
+          </div>
+          <div>
+            <label for="apiSecret">x-agent-secret</label>
+            <input id="apiSecret" placeholder="Ton secret" />
+          </div>
+          <div>
+            <label for="detailMode">Mode de reponse</label>
+            <select id="detailMode">
+              <option value="long">Long (recommande)</option>
+              <option value="short">Court</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button onclick="saveConfig()">Save config</button>
+            <button class="btn-secondary" onclick="checkApi()">Re-check API</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="clearConversation()">Reset conversation</button>
+          </div>
+        </section>
 
-      <div>
-        <label for="detailMode">Mode de reponse</label>
-        <select id="detailMode">
-          <option value="long">Long (recommande)</option>
-          <option value="short">Court</option>
-        </select>
-      </div>
+        <section class="card section">
+          <h2>Market Signals</h2>
+          <label for="trendKeywords">Mots-cles (auto IA)</label>
+          <input id="trendKeywords" placeholder="manomano, leroy merlin, castorama" />
+          <p class="mini-note">L'IA met a jour les mots-cles a chaque question. Tu peux les modifier.</p>
+          <div class="btn-row">
+            <button onclick="refreshTrends()">Charger tendances</button>
+          </div>
+          <div class="trend-box">
+            <div id="trendStatus" class="trend-status">en attente...</div>
+            <div id="trendResults"></div>
+          </div>
+        </section>
+      </aside>
 
-      <div class="btn-row">
-        <button onclick="saveConfig()">Save config</button>
-        <button class="secondary" onclick="checkApi()">Re-check API</button>
-      </div>
-
-      <div class="btn-row">
-        <button class="secondary" onclick="clearConversation()">Reset conversation</button>
-      </div>
-
-      <div>
-        <h2>Market signals (gratuit)</h2>
-        <label for="trendKeywords">Mots-cles (virgules)</label>
-        <input id="trendKeywords" placeholder="manomano, leroy merlin, castorama" />
-        <p class="muted">Mode auto: l'IA choisit les mots-cles a chaque question.</p>
-        <div class="btn-row" style="margin-top:8px;">
-          <button onclick="refreshTrends()">Charger tendances</button>
-        </div>
-        <div class="trend-box" style="margin-top:8px;">
-          <div id="trendStatus" class="trend-status">en attente...</div>
-          <div id="trendResults"></div>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main card">
-      <div class="head">
-        <div>
+      <main class="card chat-shell">
+        <div class="chat-head">
           <strong>Conversation strategique</strong>
-          <p>Le contexte est conserve entre les messages.</p>
+          <p class="mini-note">Contexte persistant + enrichissement automatique des signaux marche.</p>
         </div>
-      </div>
 
-      <div class="starters" id="starters"></div>
+        <div class="starters" id="starters"></div>
 
-      <section id="thread" class="thread"></section>
+        <section id="thread" class="thread"></section>
 
-      <div class="composer">
-        <textarea id="question" placeholder="Pose ta question (diagnostic, risques, decisions, plan d'action)..."></textarea>
-        <div class="btn-row">
-          <button onclick="askAgent()">Envoyer</button>
-          <button class="secondary" onclick="clearInput()">Effacer</button>
+        <div class="composer">
+          <textarea id="question" placeholder="Pose ta question (diagnostic, risques, decisions, plan d'action)..."></textarea>
+          <div class="btn-row">
+            <button onclick="askAgent()">Envoyer</button>
+            <button class="btn-secondary" onclick="clearInput()">Effacer</button>
+          </div>
+          <p class="mini-note">Ctrl/Cmd + Entree pour envoyer.</p>
         </div>
-        <p class="muted">Entree: nouvelle ligne. Ctrl+Entree (ou Cmd+Entree): envoyer.</p>
-      </div>
-    </main>
+      </main>
+
+      <aside class="right-col">
+        <section class="card section">
+          <div>
+            <h3 id="modeTitle" class="mode-title">Diagnostic</h3>
+            <p id="modeSub" class="mode-sub">Vue structuree de la derniere reponse.</p>
+          </div>
+          <div id="insightPrimary" class="list"></div>
+        </section>
+
+        <section class="card section">
+          <h2>Trace technique</h2>
+          <div id="techTrace" class="tech-trace">Aucune execution pour le moment.</div>
+        </section>
+      </aside>
+    </div>
   </div>
 
   <script>
@@ -374,6 +506,8 @@
 
     let history = [];
     let sessionId = "";
+    let currentView = "diagnostic";
+    let lastResponseText = "";
 
     function generateSessionId() {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -423,36 +557,103 @@
 
     function getTrendsApiUrl(apiUrl) {
       if (!apiUrl) return "";
-      if (/\/api\/agent\/?$/.test(apiUrl)) {
-        return apiUrl.replace(/\/api\/agent\/?$/, "/api/market-signals");
-      }
-      if (/\/api\/?$/.test(apiUrl)) {
-        return `${apiUrl.replace(/\/$/, "")}/market-signals`;
-      }
+      if (/\/api\/agent\/?$/.test(apiUrl)) return apiUrl.replace(/\/api\/agent\/?$/, "/api/market-signals");
+      if (/\/api\/?$/.test(apiUrl)) return `${apiUrl.replace(/\/$/, "")}/market-signals`;
       return `${apiUrl.replace(/\/$/, "")}/api/market-signals`;
     }
 
     function getKeywordSuggestApiUrl(apiUrl) {
       if (!apiUrl) return "";
-      if (/\/api\/agent\/?$/.test(apiUrl)) {
-        return apiUrl.replace(/\/api\/agent\/?$/, "/api/keyword-suggest");
-      }
-      if (/\/api\/?$/.test(apiUrl)) {
-        return `${apiUrl.replace(/\/$/, "")}/keyword-suggest`;
-      }
+      if (/\/api\/agent\/?$/.test(apiUrl)) return apiUrl.replace(/\/api\/agent\/?$/, "/api/keyword-suggest");
+      if (/\/api\/?$/.test(apiUrl)) return `${apiUrl.replace(/\/$/, "")}/keyword-suggest`;
       return `${apiUrl.replace(/\/$/, "")}/api/keyword-suggest`;
+    }
+
+    function loadHistory() {
+      const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+      if (!raw) {
+        history = [];
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          history = parsed.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
+          const latestAssistant = [...history].reverse().find((m) => m.role === "assistant");
+          lastResponseText = latestAssistant ? latestAssistant.content : "";
+        }
+      } catch {
+        history = [];
+      }
+    }
+
+    function saveHistory() {
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY_MESSAGES)));
+    }
+
+    function clearConversation() {
+      history = [];
+      sessionId = generateSessionId();
+      localStorage.setItem(SESSION_ID_KEY, sessionId);
+      saveHistory();
+      renderThread();
+      renderInsights();
+      document.getElementById("techTrace").textContent = "Aucune execution pour le moment.";
+    }
+
+    function clearInput() {
+      document.getElementById("question").value = "";
+    }
+
+    function appendMessage(role, content) {
+      history.push({ role, content });
+      history = history.slice(-MAX_HISTORY_MESSAGES);
+      saveHistory();
+      renderThread();
+    }
+
+    function renderThread() {
+      const thread = document.getElementById("thread");
+      thread.innerHTML = "";
+      if (history.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "muted-empty";
+        empty.textContent = "Aucune conversation pour le moment. Utilise un starter ou pose une question.";
+        thread.appendChild(empty);
+        return;
+      }
+      for (const message of history) {
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${message.role}`;
+        bubble.textContent = message.content;
+        thread.appendChild(bubble);
+      }
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function renderStarters() {
+      const container = document.getElementById("starters");
+      container.innerHTML = "";
+      for (const text of STARTERS) {
+        const btn = document.createElement("button");
+        btn.className = "starter";
+        btn.textContent = text;
+        btn.onclick = () => {
+          document.getElementById("question").value = text;
+          askAgent();
+        };
+        container.appendChild(btn);
+      }
     }
 
     function renderTrends(data) {
       const target = document.getElementById("trendResults");
       target.innerHTML = "";
-
       const series = Array.isArray(data?.series) ? data.series : [];
       if (series.length === 0) {
         target.textContent = "Aucune donnee.";
         return;
       }
-
       for (const item of series) {
         const row = document.createElement("div");
         row.className = "trend-row";
@@ -471,8 +672,8 @@
         const meta = document.createElement("div");
         meta.className = "trend-meta";
         const delta = Number(item.delta || 0);
-        const trendArrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
-        meta.textContent = `${trendArrow} ${Number(item.latest || 0)}`;
+        const arrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
+        meta.textContent = `${arrow} ${Number(item.latest || 0)}`;
 
         row.appendChild(key);
         row.appendChild(bar);
@@ -485,43 +686,31 @@
       const status = document.getElementById("trendStatus");
       const { apiUrl, secret, trendKeywords } = getConfig();
       const trendsApiUrl = getTrendsApiUrl(apiUrl);
-
       if (!trendsApiUrl || !secret) {
-        status.textContent = "configure le backend URL et le secret.";
+        status.textContent = "Configure le backend URL et le secret.";
         return;
       }
 
       status.textContent = "chargement...";
       localStorage.setItem(TREND_KEYWORDS_KEY, trendKeywords);
-      const keywords = trendKeywords
-        .split(",")
-        .map((k) => k.trim())
-        .filter(Boolean)
-        .slice(0, 5);
+      const keywords = trendKeywords.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 5);
 
       try {
         const res = await fetch(trendsApiUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-agent-secret": secret
-          },
-          body: JSON.stringify({
-            keywords,
-            geo: "FR",
-            timeframe: "today 3-m"
-          })
+          headers: { "Content-Type": "application/json", "x-agent-secret": secret },
+          body: JSON.stringify({ keywords, geo: "FR", timeframe: "today 3-m" })
         });
 
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 140)}`);
+          throw new Error(`HTTP ${res.status} ${text.slice(0, 140)}`);
         }
 
         const data = await res.json();
         renderTrends(data);
         const fallbackInfo = data.fallbackReason ? ` | fallback: ${data.fallbackReason}` : "";
-        status.textContent = `source: ${data.provider || "google-trends-free"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}${fallbackInfo}`;
+        status.textContent = `source: ${data.provider || "unknown"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}${fallbackInfo}`;
       } catch (err) {
         status.textContent = `erreur tendances: ${err.message}`;
       }
@@ -530,20 +719,13 @@
     async function autoSuggestKeywords(question) {
       const { apiUrl, secret } = getConfig();
       const suggestUrl = getKeywordSuggestApiUrl(apiUrl);
-      if (!suggestUrl || !secret || !question) {
-        return;
-      }
-
+      if (!suggestUrl || !secret || !question) return;
       try {
         const res = await fetch(suggestUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-agent-secret": secret
-          },
+          headers: { "Content-Type": "application/json", "x-agent-secret": secret },
           body: JSON.stringify({ question, geo: "FR" })
         });
-
         if (!res.ok) return;
         const data = await res.json();
         const keywords = Array.isArray(data?.keywords) ? data.keywords.slice(0, 5) : [];
@@ -553,85 +735,7 @@
         document.getElementById("trendKeywords").value = merged;
         localStorage.setItem(TREND_KEYWORDS_KEY, merged);
       } catch {
-        // keep manual keywords on failure
-      }
-    }
-
-    function loadHistory() {
-      const raw = localStorage.getItem(CHAT_HISTORY_KEY);
-      if (!raw) {
-        history = [];
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          history = parsed.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string");
-        }
-      } catch {
-        history = [];
-      }
-    }
-
-    function saveHistory() {
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY_MESSAGES)));
-    }
-
-    function clearConversation() {
-      history = [];
-      sessionId = generateSessionId();
-      localStorage.setItem(SESSION_ID_KEY, sessionId);
-      saveHistory();
-      renderThread();
-    }
-
-    function clearInput() {
-      document.getElementById("question").value = "";
-    }
-
-    function appendMessage(role, content) {
-      history.push({ role, content });
-      history = history.slice(-MAX_HISTORY_MESSAGES);
-      saveHistory();
-      renderThread();
-    }
-
-    function renderThread() {
-      const thread = document.getElementById("thread");
-      thread.innerHTML = "";
-
-      if (history.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "muted";
-        empty.textContent = "Aucune conversation pour le moment. Utilise un starter ou pose une question.";
-        thread.appendChild(empty);
-        return;
-      }
-
-      for (const message of history) {
-        const bubble = document.createElement("div");
-        bubble.className = `bubble ${message.role}`;
-        bubble.textContent = message.content;
-        thread.appendChild(bubble);
-      }
-
-      thread.scrollTop = thread.scrollHeight;
-    }
-
-    function renderStarters() {
-      const container = document.getElementById("starters");
-      container.innerHTML = "";
-
-      for (const text of STARTERS) {
-        const btn = document.createElement("button");
-        btn.className = "starter";
-        btn.textContent = text;
-        btn.onclick = () => {
-          document.getElementById("question").value = text;
-          askAgent();
-        };
-        container.appendChild(btn);
+        // noop
       }
     }
 
@@ -645,7 +749,6 @@
         el.classList.add("err");
         return;
       }
-
       if (!secret) {
         el.textContent = "secret manquant";
         el.classList.add("err");
@@ -655,18 +758,13 @@
       try {
         const res = await fetch(apiUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-agent-secret": secret
-          },
+          headers: { "Content-Type": "application/json", "x-agent-secret": secret },
           body: JSON.stringify({ messages: [{ role: "user", content: "ping" }] })
         });
-
         if (!res.ok) {
           const text = await res.text();
-          throw new Error(`HTTP ${res.status} ${res.statusText} | ${text.slice(0, 160)}`);
+          throw new Error(`HTTP ${res.status} | ${text.slice(0, 160)}`);
         }
-
         el.textContent = "connecte";
         el.classList.add("ok");
       } catch (err) {
@@ -675,15 +773,113 @@
       }
     }
 
+    function extractInsights(text) {
+      const lines = String(text || "").split("\n").map((l) => l.trim()).filter(Boolean);
+      const facts = [];
+      const hypotheses = [];
+      const unknowns = [];
+      const decisions = [];
+
+      for (const line of lines) {
+        if (line.includes("[Fact")) facts.push(line);
+        if (line.includes("[Hypothesis")) hypotheses.push(line);
+        if (line.includes("[Unknown")) unknowns.push(line);
+        if (/option|decision|recommand|plan/i.test(line)) decisions.push(line);
+      }
+
+      return {
+        facts: facts.slice(0, 6),
+        hypotheses: hypotheses.slice(0, 6),
+        unknowns: unknowns.slice(0, 6),
+        decisions: decisions.slice(0, 6),
+        sections: lines.filter((l) => /^##\s*\d+/i.test(l)).slice(0, 10)
+      };
+    }
+
+    function renderInsights() {
+      const title = document.getElementById("modeTitle");
+      const sub = document.getElementById("modeSub");
+      const container = document.getElementById("insightPrimary");
+      const data = extractInsights(lastResponseText);
+      container.innerHTML = "";
+
+      if (!lastResponseText) {
+        const empty = document.createElement("p");
+        empty.className = "muted-empty";
+        empty.textContent = "Envoye une question pour alimenter cette vue.";
+        container.appendChild(empty);
+        return;
+      }
+
+      if (currentView === "diagnostic") {
+        title.textContent = "Diagnostic";
+        sub.textContent = "Faits, hypotheses et inconnus de la derniere reponse.";
+
+        for (const line of data.facts) {
+          const item = document.createElement("div");
+          item.className = "item fact";
+          item.textContent = line;
+          container.appendChild(item);
+        }
+        for (const line of data.hypotheses.slice(0, 3)) {
+          const item = document.createElement("div");
+          item.className = "item hyp";
+          item.textContent = line;
+          container.appendChild(item);
+        }
+        for (const line of data.unknowns.slice(0, 3)) {
+          const item = document.createElement("div");
+          item.className = "item unk";
+          item.textContent = line;
+          container.appendChild(item);
+        }
+      }
+
+      if (currentView === "scenarios") {
+        title.textContent = "Scenarios";
+        sub.textContent = "Points de stress test et hypotheses de bascule.";
+
+        const source = [...data.hypotheses, ...data.unknowns, ...data.sections].slice(0, 8);
+        for (const line of source) {
+          const item = document.createElement("div");
+          item.className = line.includes("[Unknown") ? "item unk" : "item hyp";
+          item.textContent = line;
+          container.appendChild(item);
+        }
+      }
+
+      if (currentView === "decision") {
+        title.textContent = "Decision";
+        sub.textContent = "Options et recommandations extraites automatiquement.";
+
+        const source = [...data.decisions, ...data.sections].slice(0, 8);
+        if (source.length === 0) {
+          const item = document.createElement("div");
+          item.className = "item";
+          item.textContent = "Pas encore de blocs decision detectes. Relance avec une question orientee options/plan.";
+          container.appendChild(item);
+        } else {
+          for (const line of source) {
+            const item = document.createElement("div");
+            item.className = "item";
+            item.textContent = line;
+            container.appendChild(item);
+          }
+        }
+      }
+    }
+
+    function setTechnicalTrace(lines) {
+      const target = document.getElementById("techTrace");
+      target.textContent = lines.length > 0 ? lines.join("\n") : "Aucune execution pour le moment.";
+    }
+
     async function askAgent() {
       const questionInput = document.getElementById("question");
       const question = questionInput.value.trim();
       const { apiUrl, secret, detailMode } = getConfig();
 
-      if (!question) {
-        return;
-      }
-
+      if (!question) return;
       if (!apiUrl || !secret) {
         appendMessage("assistant", "Configure d'abord le backend URL et le secret.");
         return;
@@ -691,6 +887,7 @@
 
       appendMessage("user", question);
       questionInput.value = "";
+
       await autoSuggestKeywords(question);
       await refreshTrends();
 
@@ -701,10 +898,7 @@
       try {
         const res = await fetch(apiUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-agent-secret": secret
-          },
+          headers: { "Content-Type": "application/json", "x-agent-secret": secret },
           body: JSON.stringify({
             messages: history.filter((m) => m !== typingMessage),
             detailMode,
@@ -720,58 +914,56 @@
 
         const data = await res.json();
         const answer = typeof data.response === "string" ? data.response : JSON.stringify(data, null, 2);
-        const debugLines = [];
 
+        const debugLines = [];
         if (data && typeof data === "object") {
-          if ("model" in data) {
-            debugLines.push(`model: ${String(data.model)}`);
-          }
-          if ("webSearchEnabled" in data) {
-            debugLines.push(`web_search_used: ${String(data.webSearchEnabled)}`);
-          }
-          if ("fallback" in data) {
-            debugLines.push(`fallback: ${data.fallback ? String(data.fallback) : "none"}`);
-          }
-          if ("promptVersion" in data) {
-            debugLines.push(`prompt_version: ${String(data.promptVersion)}`);
-          }
+          if ("model" in data) debugLines.push(`model: ${String(data.model)}`);
+          if ("webSearchEnabled" in data) debugLines.push(`web_search_used: ${String(data.webSearchEnabled)}`);
+          if ("fallback" in data) debugLines.push(`fallback: ${data.fallback ? String(data.fallback) : "none"}`);
+          if ("promptVersion" in data) debugLines.push(`prompt_version: ${String(data.promptVersion)}`);
 
           if (data.airtableLog && typeof data.airtableLog === "object") {
             const a = data.airtableLog;
             debugLines.push(`airtable_enabled: ${String(Boolean(a.enabled))}`);
             debugLines.push(`airtable_ok: ${String(Boolean(a.ok))}`);
-            if (a.status !== undefined) {
-              debugLines.push(`airtable_status: ${String(a.status)}`);
-            }
-            if (typeof a.details === "string" && a.details.trim().length > 0) {
-              debugLines.push(`airtable_details: ${a.details.slice(0, 300)}`);
-            }
-            if (typeof a.fieldMapTried === "string" && a.fieldMapTried.trim().length > 0) {
-              debugLines.push(`airtable_field_map: ${a.fieldMapTried}`);
-            }
+            if (a.status !== undefined) debugLines.push(`airtable_status: ${String(a.status)}`);
+            if (typeof a.details === "string" && a.details.trim().length > 0) debugLines.push(`airtable_details: ${a.details.slice(0, 300)}`);
+            if (typeof a.fieldMapTried === "string" && a.fieldMapTried.trim().length > 0) debugLines.push(`airtable_field_map: ${a.fieldMapTried}`);
           }
 
           if (data.promptVersionLog && typeof data.promptVersionLog === "object") {
             const p = data.promptVersionLog;
             debugLines.push(`prompt_log_enabled: ${String(Boolean(p.enabled))}`);
             debugLines.push(`prompt_log_ok: ${String(Boolean(p.ok))}`);
-            if (typeof p.details === "string" && p.details.trim().length > 0) {
-              debugLines.push(`prompt_log_details: ${p.details.slice(0, 300)}`);
-            }
+            if (typeof p.details === "string" && p.details.trim().length > 0) debugLines.push(`prompt_log_details: ${p.details.slice(0, 300)}`);
           }
         }
 
-        const finalAnswer =
-          debugLines.length > 0
-            ? `${answer}\n\n---\nDiagnostic technique:\n${debugLines.join("\n")}`
-            : answer;
-
         history = history.filter((m) => m !== typingMessage);
-        appendMessage("assistant", finalAnswer);
+        appendMessage("assistant", answer);
+        lastResponseText = answer;
+        renderInsights();
+        setTechnicalTrace(debugLines);
       } catch (err) {
         history = history.filter((m) => m !== typingMessage);
         appendMessage("assistant", `Erreur appel agent: ${err.message}`);
       }
+    }
+
+    function initViewSwitch() {
+      const root = document.getElementById("viewSwitch");
+      root.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-view]");
+        if (!btn) return;
+        const view = btn.getAttribute("data-view");
+        if (!view) return;
+
+        currentView = view;
+        for (const pill of root.querySelectorAll(".pill")) {
+          pill.classList.toggle("active", pill === btn);
+        }
+        renderInsights();
+      });
     }
 
     document.getElementById("question").addEventListener("keydown", (event) => {
@@ -784,8 +976,10 @@
     loadConfig();
     loadSessionId();
     loadHistory();
+    initViewSwitch();
     renderStarters();
     renderThread();
+    renderInsights();
     checkApi();
     refreshTrends();
   </script>
