@@ -35,3 +35,5 @@ curl -sS -X POST "$BACKEND_URL" \
   -H "x-agent-secret: $AGENT_SECRET" \
   -d '{"messages":[{"role":"user","content":"ping"}]}'
 ```
+
+- Response depth mode in UI: Long (default) / Short

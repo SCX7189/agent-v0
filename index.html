@@ -87,14 +87,14 @@
       color: var(--muted);
     }
 
-    input, textarea, button {
+    input, textarea, button, select {
       width: 100%;
       border-radius: 10px;
       border: 1px solid var(--line);
       font: inherit;
     }
 
-    input {
+    input, select {
       padding: 10px 12px;
       color: var(--ink);
       background: #fff;
@@ -251,6 +251,14 @@
         <input id="apiSecret" placeholder="Ton secret agent" />
       </div>
 
+      <div>
+        <label for="detailMode">Mode de reponse</label>
+        <select id="detailMode">
+          <option value="long">Long (recommande)</option>
+          <option value="short">Court</option>
+        </select>
+      </div>
+
       <div class="btn-row">
         <button onclick="saveConfig()">Save config</button>
         <button class="secondary" onclick="checkApi()">Re-check API</button>
@@ -288,6 +296,7 @@
     const DEFAULT_API_URL = "https://agent-backend-six.vercel.app/api/agent";
     const API_URL_KEY = "agent_v0_api_url";
     const API_SECRET_KEY = "agent_v0_api_secret";
+    const DETAIL_MODE_KEY = "agent_v0_detail_mode";
     const CHAT_HISTORY_KEY = "agent_v0_chat_history";
     const MAX_HISTORY_MESSAGES = 20;
 
@@ -304,21 +313,25 @@
     function getConfig() {
       return {
         apiUrl: document.getElementById("apiUrl").value.trim(),
-        secret: document.getElementById("apiSecret").value.trim()
+        secret: document.getElementById("apiSecret").value.trim(),
+        detailMode: document.getElementById("detailMode").value
       };
     }
 
     function loadConfig() {
       const savedUrl = localStorage.getItem(API_URL_KEY);
       const savedSecret = localStorage.getItem(API_SECRET_KEY);
+      const savedDetailMode = localStorage.getItem(DETAIL_MODE_KEY);
       document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
       document.getElementById("apiSecret").value = savedSecret || "";
+      document.getElementById("detailMode").value = savedDetailMode || "long";
     }
 
     function saveConfig() {
-      const { apiUrl, secret } = getConfig();
+      const { apiUrl, secret, detailMode } = getConfig();
       localStorage.setItem(API_URL_KEY, apiUrl);
       localStorage.setItem(API_SECRET_KEY, secret);
+      localStorage.setItem(DETAIL_MODE_KEY, detailMode);
       checkApi();
     }
 
@@ -441,7 +454,7 @@
     async function askAgent() {
       const questionInput = document.getElementById("question");
       const question = questionInput.value.trim();
-      const { apiUrl, secret } = getConfig();
+      const { apiUrl, secret, detailMode } = getConfig();
 
       if (!question) {
         return;
@@ -466,7 +479,10 @@
             "Content-Type": "application/json",
             "x-agent-secret": secret
           },
-          body: JSON.stringify({ messages: history.filter((m) => m !== typingMessage) })
+          body: JSON.stringify({
+            messages: history.filter((m) => m !== typingMessage),
+            detailMode
+          })
         });
 
         if (!res.ok) {
