@@ -515,9 +515,39 @@
 
         const data = await res.json();
         const answer = typeof data.response === "string" ? data.response : JSON.stringify(data, null, 2);
+        const debugLines = [];
+
+        if (data && typeof data === "object") {
+          if ("model" in data) {
+            debugLines.push(`model: ${String(data.model)}`);
+          }
+          if ("webSearchEnabled" in data) {
+            debugLines.push(`web_search_used: ${String(data.webSearchEnabled)}`);
+          }
+          if ("fallback" in data) {
+            debugLines.push(`fallback: ${data.fallback ? String(data.fallback) : "none"}`);
+          }
+
+          if (data.airtableLog && typeof data.airtableLog === "object") {
+            const a = data.airtableLog;
+            debugLines.push(`airtable_enabled: ${String(Boolean(a.enabled))}`);
+            debugLines.push(`airtable_ok: ${String(Boolean(a.ok))}`);
+            if (a.status !== undefined) {
+              debugLines.push(`airtable_status: ${String(a.status)}`);
+            }
+            if (typeof a.details === "string" && a.details.trim().length > 0) {
+              debugLines.push(`airtable_details: ${a.details.slice(0, 300)}`);
+            }
+          }
+        }
+
+        const finalAnswer =
+          debugLines.length > 0
+            ? `${answer}\n\n---\nDiagnostic technique:\n${debugLines.join("\n")}`
+            : answer;
 
         history = history.filter((m) => m !== typingMessage);
-        appendMessage("assistant", answer);
+        appendMessage("assistant", finalAnswer);
       } catch (err) {
         history = history.filter((m) => m !== typingMessage);
         appendMessage("assistant", `Erreur appel agent: ${err.message}`);
