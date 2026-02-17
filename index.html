@@ -320,6 +320,7 @@
         <h2>Market signals (gratuit)</h2>
         <label for="trendKeywords">Mots-cles (virgules)</label>
         <input id="trendKeywords" placeholder="manomano, leroy merlin, castorama" />
+        <p class="muted">Mode auto: l'IA choisit les mots-cles a chaque question.</p>
         <div class="btn-row" style="margin-top:8px;">
           <button onclick="refreshTrends()">Charger tendances</button>
         </div>
@@ -431,6 +432,17 @@
       return `${apiUrl.replace(/\/$/, "")}/api/market-signals`;
     }
 
+    function getKeywordSuggestApiUrl(apiUrl) {
+      if (!apiUrl) return "";
+      if (/\/api\/agent\/?$/.test(apiUrl)) {
+        return apiUrl.replace(/\/api\/agent\/?$/, "/api/keyword-suggest");
+      }
+      if (/\/api\/?$/.test(apiUrl)) {
+        return `${apiUrl.replace(/\/$/, "")}/keyword-suggest`;
+      }
+      return `${apiUrl.replace(/\/$/, "")}/api/keyword-suggest`;
+    }
+
     function renderTrends(data) {
       const target = document.getElementById("trendResults");
       target.innerHTML = "";
@@ -508,9 +520,40 @@
 
         const data = await res.json();
         renderTrends(data);
-        status.textContent = `source: ${data.provider || "google-trends-free"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}`;
+        const fallbackInfo = data.fallbackReason ? ` | fallback: ${data.fallbackReason}` : "";
+        status.textContent = `source: ${data.provider || "google-trends-free"} | zone: ${data.geo || "FR"} | periode: ${data.timeframe || "today 3-m"}${fallbackInfo}`;
       } catch (err) {
         status.textContent = `erreur tendances: ${err.message}`;
+      }
+    }
+
+    async function autoSuggestKeywords(question) {
+      const { apiUrl, secret } = getConfig();
+      const suggestUrl = getKeywordSuggestApiUrl(apiUrl);
+      if (!suggestUrl || !secret || !question) {
+        return;
+      }
+
+      try {
+        const res = await fetch(suggestUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-agent-secret": secret
+          },
+          body: JSON.stringify({ question, geo: "FR" })
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+        const keywords = Array.isArray(data?.keywords) ? data.keywords.slice(0, 5) : [];
+        if (keywords.length === 0) return;
+        const merged = keywords.map((k) => String(k).trim()).filter(Boolean).join(", ");
+        if (!merged) return;
+        document.getElementById("trendKeywords").value = merged;
+        localStorage.setItem(TREND_KEYWORDS_KEY, merged);
+      } catch {
+        // keep manual keywords on failure
       }
     }
 
@@ -648,6 +691,8 @@
 
       appendMessage("user", question);
       questionInput.value = "";
+      await autoSuggestKeywords(question);
+      await refreshTrends();
 
       const typingMessage = { role: "assistant", content: "Analyse en cours..." };
       history.push(typingMessage);

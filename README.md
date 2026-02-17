@@ -9,6 +9,7 @@ Static frontend for calling the backend `/api/agent` endpoint.
 - Backend URL + secret editable from the UI
 - Full message history is sent to keep context
 - Market signals panel (Google Trends gratuit) with keyword comparison
+- Choix auto des mots-cles tendances par IA a chaque nouvelle question
 
 ### Local check
 
