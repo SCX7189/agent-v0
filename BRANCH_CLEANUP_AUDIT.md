@@ -38,9 +38,15 @@ Branch analysée: `work`
    - Étape 2: extraire le CSS dans `src/styles.css`.
    - Étape 3: séparer modules `api.js`, `state.js`, `render.js`.
 
-4. **Sécuriser les changements**
-   - Ajouter un minimum de checks automatisés (lint + smoke test).
+4. **Sécuriser les changements (sans imposer `make`)**
+   - Ajouter des checks automatisés simples (par ex. lint + smoke test) via le runner déjà utilisé dans ton repo.
+   - Si `make` sert uniquement à updater Pinecone chez toi, garder ce flux tel quel et ne pas le mélanger avec les checks front.
    - Ajouter une checklist PR (API ping, envoi message, rendu insights, fallback trends).
+
+## Note de clarification
+
+- Le point précédent ne veut **pas** dire “il faut passer par `make`”.
+- L’objectif est seulement d’avoir un minimum de validation automatique sur le front, avec l’outil qui convient à ton stack actuelle.
 
 ## Verdict
 
