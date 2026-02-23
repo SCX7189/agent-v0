@@ -632,6 +632,23 @@
     let lastResponseText = "";
     let lastRenderedSections = [];
 
+
+    function safeStorageGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+
+    function safeStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // storage unavailable
+      }
+    }
+
     function generateSessionId() {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
         return crypto.randomUUID();
@@ -640,13 +657,13 @@
     }
 
     function loadSessionId() {
-      const existing = localStorage.getItem(SESSION_ID_KEY);
+      const existing = safeStorageGet(SESSION_ID_KEY);
       if (existing) {
         sessionId = existing;
         return;
       }
       sessionId = generateSessionId();
-      localStorage.setItem(SESSION_ID_KEY, sessionId);
+      safeStorageSet(SESSION_ID_KEY, sessionId);
     }
 
     function getConfig() {
@@ -659,10 +676,10 @@
     }
 
     function loadConfig() {
-      const savedUrl = localStorage.getItem(API_URL_KEY);
-      const savedSecret = localStorage.getItem(API_SECRET_KEY);
-      const savedDetailMode = localStorage.getItem(DETAIL_MODE_KEY);
-      const savedTrendKeywords = localStorage.getItem(TREND_KEYWORDS_KEY);
+      const savedUrl = safeStorageGet(API_URL_KEY);
+      const savedSecret = safeStorageGet(API_SECRET_KEY);
+      const savedDetailMode = safeStorageGet(DETAIL_MODE_KEY);
+      const savedTrendKeywords = safeStorageGet(TREND_KEYWORDS_KEY);
       document.getElementById("apiUrl").value = savedUrl || DEFAULT_API_URL;
       document.getElementById("apiSecret").value = savedSecret || "";
       document.getElementById("detailMode").value = savedDetailMode || "long";
@@ -671,10 +688,10 @@
 
     function saveConfig() {
       const { apiUrl, secret, detailMode, trendKeywords } = getConfig();
-      localStorage.setItem(API_URL_KEY, apiUrl);
-      localStorage.setItem(API_SECRET_KEY, secret);
-      localStorage.setItem(DETAIL_MODE_KEY, detailMode);
-      localStorage.setItem(TREND_KEYWORDS_KEY, trendKeywords);
+      safeStorageSet(API_URL_KEY, apiUrl);
+      safeStorageSet(API_SECRET_KEY, secret);
+      safeStorageSet(DETAIL_MODE_KEY, detailMode);
+      safeStorageSet(TREND_KEYWORDS_KEY, trendKeywords);
       checkApi();
     }
 
@@ -693,7 +710,7 @@
     }
 
     function loadHistory() {
-      const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+      const raw = safeStorageGet(CHAT_HISTORY_KEY);
       if (!raw) {
         history = [];
         return;
@@ -711,13 +728,13 @@
     }
 
     function saveHistory() {
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY_MESSAGES)));
+      safeStorageSet(CHAT_HISTORY_KEY, JSON.stringify(history.slice(-MAX_HISTORY_MESSAGES)));
     }
 
     function clearConversation() {
       history = [];
       sessionId = generateSessionId();
-      localStorage.setItem(SESSION_ID_KEY, sessionId);
+      safeStorageSet(SESSION_ID_KEY, sessionId);
       saveHistory();
       renderThread();
       renderInsights();
@@ -982,7 +999,7 @@
       }
 
       status.textContent = "chargement...";
-      localStorage.setItem(TREND_KEYWORDS_KEY, trendKeywords);
+      safeStorageSet(TREND_KEYWORDS_KEY, trendKeywords);
       const keywords = trendKeywords.split(",").map((k) => k.trim()).filter(Boolean).slice(0, 5);
 
       try {
@@ -1023,7 +1040,7 @@
         const merged = keywords.map((k) => String(k).trim()).filter(Boolean).join(", ");
         if (!merged) return;
         document.getElementById("trendKeywords").value = merged;
-        localStorage.setItem(TREND_KEYWORDS_KEY, merged);
+        safeStorageSet(TREND_KEYWORDS_KEY, merged);
       } catch {
         // noop
       }
